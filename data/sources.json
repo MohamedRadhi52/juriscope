@@ -1,0 +1,10 @@
+{
+  "@socialgouv/legi-data": {
+    "version": "2.565.0",
+    "integrity": "sha512-52L6KH3HsdkR8Ffpit45OAPgFjk9tzLvIwOG61rncGKUSMKSVCxmVI3eW0JP1dktOYt3u/CF+KrZwy4DLcnFQQ=="
+  },
+  "@socialgouv/kali-data": {
+    "version": "3.504.0",
+    "integrity": "sha512-cH4qpIktUeMmzbod0dFGEsPbmHtZr0Ma/tfNUhvrzpkdF40BdFzHxFhAXeOTMA9ly5kqGzCGYE8idL5sW2nfbw=="
+  }
+}
