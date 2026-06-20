@@ -1,10 +1,10 @@
-"""Télécharge les versions du corpus épinglées dans data/sources.json."""
+"""Télécharge les versions du corpus épinglées dans data/sources.json et le découpe."""
 
 import argparse
 import json
 
-from juriscope.ingest import npm
-from juriscope.paths import RAW, ROOT, SOURCES
+from juriscope.ingest import npm, parse
+from juriscope.paths import CORPUS, RAW, ROOT, SOURCES
 
 
 def main() -> None:
@@ -28,9 +28,30 @@ def main() -> None:
             SOURCES.write_text(json.dumps(sources, indent=2) + "\n")
         return
 
+    tarballs = {}
     for package, pin in sources.items():
-        path = npm.ensure_tarball(package, pin["version"], pin["integrity"], RAW)
-        print(f"{package} {pin['version']} : {path.relative_to(ROOT)}")
+        tarballs[package] = npm.ensure_tarball(package, pin["version"], pin["integrity"], RAW)
+        print(f"{package} {pin['version']} : {tarballs[package].relative_to(ROOT)}")
+
+    manifest_path = CORPUS / "manifest.json"
+    if manifest_path.exists():
+        manifest = json.loads(manifest_path.read_text())
+        if manifest["format"] == parse.FORMAT and manifest["sources"] == sources:
+            print(f"corpus déjà à jour : {manifest['stats']['articles']} articles")
+            return
+
+    articles, stats = parse.build_corpus(
+        tarballs["@socialgouv/legi-data"], tarballs["@socialgouv/kali-data"]
+    )
+    CORPUS.mkdir(parents=True, exist_ok=True)
+    with (CORPUS / "articles.jsonl").open("w", encoding="utf-8") as f:
+        for article in articles:
+            f.write(json.dumps(article, ensure_ascii=False) + "\n")
+    manifest = {"format": parse.FORMAT, "sources": sources, "stats": stats}
+    manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n")
+    print("corpus construit :")
+    for key, value in stats.items():
+        print(f"  {key} : {value}")
 
 
 if __name__ == "__main__":
