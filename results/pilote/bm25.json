@@ -1,0 +1,580 @@
+{
+  "questions": 30,
+  "rappel@10": {
+    "moyenne": 0.5666666666666667,
+    "ic95": [
+      0.4,
+      0.7166666666666667
+    ]
+  },
+  "mrr@10": {
+    "moyenne": 0.28555555555555556,
+    "ic95": [
+      0.16073842592592594,
+      0.429847222222222
+    ]
+  },
+  "ndcg@10": {
+    "moyenne": 0.34547537990235117,
+    "ic95": [
+      0.21939596226712524,
+      0.48154915791284425
+    ]
+  },
+  "latence_ms": {
+    "p50": 0.3468979999752264,
+    "p95": 1.492228199998634
+  },
+  "details": [
+    {
+      "id": "p01",
+      "rappel@10": 0.0,
+      "mrr@10": 0.0,
+      "ndcg@10": 0.0,
+      "top10": [
+        "KALIARTI000039112815",
+        "KALIARTI000039111094",
+        "KALIARTI000029617119",
+        "KALIARTI000005864852",
+        "KALIARTI000005826407",
+        "KALIARTI000005850089",
+        "KALIARTI000027172465",
+        "KALIARTI000005865352",
+        "KALIARTI000005863681",
+        "KALIARTI000030068667"
+      ]
+    },
+    {
+      "id": "p02",
+      "rappel@10": 0.0,
+      "mrr@10": 0.0,
+      "ndcg@10": 0.0,
+      "top10": [
+        "KALIARTI000046314718",
+        "LEGIARTI000018999573",
+        "KALIARTI000005826280",
+        "KALIARTI000044942734",
+        "KALIARTI000005846907",
+        "LEGIARTI000018482969",
+        "LEGIARTI000006902803",
+        "KALIARTI000005826390",
+        "KALIARTI000047348428",
+        "KALIARTI000029139110"
+      ]
+    },
+    {
+      "id": "p03",
+      "rappel@10": 0.0,
+      "mrr@10": 0.0,
+      "ndcg@10": 0.0,
+      "top10": [
+        "KALIARTI000046314335",
+        "KALIARTI000005863696",
+        "KALIARTI000005850166",
+        "KALIARTI000029139132",
+        "KALIARTI000029330084",
+        "KALIARTI000005826407",
+        "KALIARTI000005826367",
+        "KALIARTI000027172499",
+        "KALIARTI000005850341",
+        "KALIARTI000039114584"
+      ]
+    },
+    {
+      "id": "p04",
+      "rappel@10": 1.0,
+      "mrr@10": 0.2,
+      "ndcg@10": 0.38685280723454163,
+      "top10": [
+        "KALIARTI000033415269",
+        "KALIARTI000047348382",
+        "KALIARTI000019022455",
+        "KALIARTI000005772425",
+        "LEGIARTI000006902455",
+        "KALIARTI000046657088",
+        "KALIARTI000039112815",
+        "LEGIARTI000006902456",
+        "KALIARTI000033415278",
+        "KALIARTI000046598763"
+      ]
+    },
+    {
+      "id": "p05",
+      "rappel@10": 0.0,
+      "mrr@10": 0.0,
+      "ndcg@10": 0.0,
+      "top10": [
+        "KALIARTI000046314571",
+        "KALIARTI000005863139",
+        "KALIARTI000005792032",
+        "KALIARTI000005826353",
+        "KALIARTI000044253082",
+        "KALIARTI000005826284",
+        "KALIARTI000027172421",
+        "KALIARTI000005864874",
+        "KALIARTI000042096251",
+        "LEGIARTI000033006283"
+      ]
+    },
+    {
+      "id": "p06",
+      "rappel@10": 1.0,
+      "mrr@10": 0.5,
+      "ndcg@10": 0.6309297535714575,
+      "top10": [
+        "KALIARTI000046314492",
+        "LEGIARTI000019067614",
+        "KALIARTI000046314499",
+        "KALIARTI000046314497",
+        "KALIARTI000005865196",
+        "KALIARTI000020549612",
+        "KALIARTI000046314494",
+        "KALIARTI000020549610",
+        "KALIARTI000005865015",
+        "KALIARTI000005771197"
+      ]
+    },
+    {
+      "id": "p07",
+      "rappel@10": 1.0,
+      "mrr@10": 0.16666666666666666,
+      "ndcg@10": 0.3562071871080222,
+      "top10": [
+        "KALIARTI000046033577",
+        "KALIARTI000044253063",
+        "KALIARTI000046314500",
+        "KALIARTI000046314499",
+        "KALIARTI000046314497",
+        "LEGIARTI000019067684",
+        "KALIARTI000005771049",
+        "KALIARTI000048052596",
+        "KALIARTI000005771197",
+        "KALIARTI000005792077"
+      ]
+    },
+    {
+      "id": "p08",
+      "rappel@10": 1.0,
+      "mrr@10": 1.0,
+      "ndcg@10": 1.0,
+      "top10": [
+        "LEGIARTI000006901112",
+        "KALIARTI000027172424",
+        "KALIARTI000005784453",
+        "KALIARTI000005826299",
+        "KALIARTI000005865064",
+        "KALIARTI000021237346",
+        "KALIARTI000021237342",
+        "LEGIARTI000006904518",
+        "KALIARTI000044253070",
+        "KALIARTI000005865070"
+      ]
+    },
+    {
+      "id": "p09",
+      "rappel@10": 1.0,
+      "mrr@10": 0.125,
+      "ndcg@10": 0.31546487678572877,
+      "top10": [
+        "KALIARTI000005771131",
+        "KALIARTI000005770888",
+        "KALIARTI000041458852",
+        "KALIARTI000041458865",
+        "KALIARTI000005771274",
+        "KALIARTI000046314535",
+        "KALIARTI000005826298",
+        "LEGIARTI000006901122",
+        "KALIARTI000041458877",
+        "KALIARTI000005849373"
+      ]
+    },
+    {
+      "id": "p10",
+      "rappel@10": 0.0,
+      "mrr@10": 0.0,
+      "ndcg@10": 0.0,
+      "top10": [
+        "KALIARTI000046314541",
+        "KALIARTI000021298416",
+        "KALIARTI000005838843",
+        "KALIARTI000046314543",
+        "KALIARTI000028321657",
+        "KALIARTI000051834613",
+        "KALIARTI000005837612",
+        "LEGIARTI000018483194",
+        "LEGIARTI000044946857",
+        "KALIARTI000046033579"
+      ]
+    },
+    {
+      "id": "p11",
+      "rappel@10": 1.0,
+      "mrr@10": 0.3333333333333333,
+      "ndcg@10": 0.5,
+      "top10": [
+        "LEGIARTI000018486047",
+        "LEGIARTI000006901023",
+        "LEGIARTI000006901000",
+        "KALIARTI000005851375",
+        "LEGIARTI000006902302",
+        "LEGIARTI000006902294",
+        "KALIARTI000044253069",
+        "LEGIARTI000006902308",
+        "KALIARTI000005779933",
+        "LEGIARTI000006902300"
+      ]
+    },
+    {
+      "id": "p12",
+      "rappel@10": 1.0,
+      "mrr@10": 0.25,
+      "ndcg@10": 0.43067655807339306,
+      "top10": [
+        "KALIARTI000024891136",
+        "LEGIARTI000006900822",
+        "LEGIARTI000006900821",
+        "LEGIARTI000006900818",
+        "LEGIARTI000006900823",
+        "LEGIARTI000006900819",
+        "KALIARTI000054303622",
+        "LEGIARTI000006900820",
+        "KALIARTI000049620669",
+        "LEGIARTI000006900834"
+      ]
+    },
+    {
+      "id": "p13",
+      "rappel@10": 1.0,
+      "mrr@10": 0.2,
+      "ndcg@10": 0.38685280723454163,
+      "top10": [
+        "KALIARTI000054303696",
+        "LEGIARTI000006900899",
+        "LEGIARTI000006900898",
+        "LEGIARTI000006900901",
+        "LEGIARTI000006900897",
+        "KALIARTI000005792093",
+        "LEGIARTI000006900903",
+        "KALIARTI000005849527",
+        "KALIARTI000005849387",
+        "KALIARTI000005849582"
+      ]
+    },
+    {
+      "id": "p14",
+      "rappel@10": 0.0,
+      "mrr@10": 0.0,
+      "ndcg@10": 0.0,
+      "top10": [
+        "LEGIARTI000018483139",
+        "LEGIARTI000019068135",
+        "LEGIARTI000024391521",
+        "KALIARTI000005826380",
+        "LEGIARTI000035610515",
+        "KALIARTI000054254299",
+        "LEGIARTI000018486155",
+        "LEGIARTI000028723378",
+        "KALIARTI000038165575",
+        "LEGIARTI000036439613"
+      ]
+    },
+    {
+      "id": "p15",
+      "rappel@10": 0.0,
+      "mrr@10": 0.0,
+      "ndcg@10": 0.0,
+      "top10": [
+        "KALIARTI000021044143",
+        "KALIARTI000054254346",
+        "KALIARTI000046314492",
+        "KALIARTI000038649733",
+        "LEGIARTI000019067635",
+        "KALIARTI000035590632",
+        "KALIARTI000038184147",
+        "KALIARTI000005850390",
+        "KALIARTI000051843405",
+        "KALIARTI000046033577"
+      ]
+    },
+    {
+      "id": "p16",
+      "rappel@10": 0.0,
+      "mrr@10": 0.0,
+      "ndcg@10": 0.0,
+      "top10": [
+        "KALIARTI000021044143",
+        "KALIARTI000038881400",
+        "KALIARTI000038881403",
+        "KALIARTI000046559177",
+        "KALIARTI000038649733",
+        "KALIARTI000038881399",
+        "KALIARTI000038881402",
+        "KALIARTI000032064833",
+        "KALIARTI000005863749",
+        "KALIARTI000035590632"
+      ]
+    },
+    {
+      "id": "p17",
+      "rappel@10": 0.0,
+      "mrr@10": 0.0,
+      "ndcg@10": 0.0,
+      "top10": [
+        "KALIARTI000030068673",
+        "KALIARTI000020970017",
+        "KALIARTI000005849790",
+        "KALIARTI000019460105",
+        "KALIARTI000027172413",
+        "KALIARTI000005826386",
+        "KALIARTI000019460112",
+        "KALIARTI000039333421",
+        "KALIARTI000005851646",
+        "KALIARTI000005864837"
+      ]
+    },
+    {
+      "id": "p18",
+      "rappel@10": 1.0,
+      "mrr@10": 0.1111111111111111,
+      "ndcg@10": 0.3010299956639812,
+      "top10": [
+        "KALIARTI000005792046",
+        "KALIARTI000046314770",
+        "KALIARTI000005866526",
+        "KALIARTI000048437156",
+        "LEGIARTI000006902513",
+        "KALIARTI000046314754",
+        "KALIARTI000005826358",
+        "KALIARTI000026803623",
+        "LEGIARTI000006902495",
+        "KALIARTI000005826395"
+      ]
+    },
+    {
+      "id": "p19",
+      "rappel@10": 1.0,
+      "mrr@10": 0.1111111111111111,
+      "ndcg@10": 0.3010299956639812,
+      "top10": [
+        "KALIARTI000031114398",
+        "KALIARTI000005849383",
+        "KALIARTI000005849515",
+        "KALIARTI000005849578",
+        "KALIARTI000005849269",
+        "KALIARTI000005863137",
+        "KALIARTI000005769913",
+        "KALIARTI000005826287",
+        "LEGIARTI000006902672",
+        "KALIARTI000041458806"
+      ]
+    },
+    {
+      "id": "p20",
+      "rappel@10": 0.0,
+      "mrr@10": 0.0,
+      "ndcg@10": 0.0,
+      "top10": [
+        "KALIARTI000042085732",
+        "KALIARTI000045110153",
+        "KALIARTI000052226912",
+        "KALIARTI000054278346",
+        "KALIARTI000046314776",
+        "KALIARTI000053434056",
+        "KALIARTI000005864824",
+        "KALIARTI000049620764",
+        "KALIARTI000052302395",
+        "KALIARTI000038326610"
+      ]
+    },
+    {
+      "id": "p21",
+      "rappel@10": 0.0,
+      "mrr@10": 0.0,
+      "ndcg@10": 0.0,
+      "top10": [
+        "LEGIARTI000033443323",
+        "KALIARTI000005826346",
+        "LEGIARTI000018483354",
+        "KALIARTI000005826388",
+        "LEGIARTI000033443546",
+        "KALIARTI000046314704",
+        "LEGIARTI000033443469",
+        "LEGIARTI000006902463",
+        "LEGIARTI000033443551",
+        "KALIARTI000053049671"
+      ]
+    },
+    {
+      "id": "p22",
+      "rappel@10": 0.5,
+      "mrr@10": 0.125,
+      "ndcg@10": 0.19342640361727081,
+      "top10": [
+        "KALIARTI000046314704",
+        "KALIARTI000046314703",
+        "KALIARTI000005846907",
+        "LEGIARTI000033509288",
+        "KALIARTI000043511061",
+        "LEGIARTI000033443541",
+        "LEGIARTI000006900899",
+        "LEGIARTI000006902459",
+        "KALIARTI000046314665",
+        "LEGIARTI000006902462"
+      ]
+    },
+    {
+      "id": "p23",
+      "rappel@10": 0.0,
+      "mrr@10": 0.0,
+      "ndcg@10": 0.0,
+      "top10": [
+        "KALIARTI000005849373",
+        "KALIARTI000046314535",
+        "KALIARTI000005771274",
+        "KALIARTI000005771131",
+        "KALIARTI000005770888",
+        "KALIARTI000005863126",
+        "LEGIARTI000018483188",
+        "KALIARTI000041458877",
+        "KALIARTI000041458865",
+        "KALIARTI000041458852"
+      ]
+    },
+    {
+      "id": "p24",
+      "rappel@10": 1.0,
+      "mrr@10": 1.0,
+      "ndcg@10": 1.0,
+      "top10": [
+        "KALIARTI000044253070",
+        "KALIARTI000044253072",
+        "KALIARTI000047006946",
+        "KALIARTI000044253150",
+        "KALIARTI000047006943",
+        "KALIARTI000005851320",
+        "KALIARTI000005851374",
+        "KALIARTI000049764072",
+        "KALIARTI000005851319",
+        "KALIARTI000047348436"
+      ]
+    },
+    {
+      "id": "p25",
+      "rappel@10": 1.0,
+      "mrr@10": 0.3333333333333333,
+      "ndcg@10": 0.5,
+      "top10": [
+        "KALIARTI000005851321",
+        "KALIARTI000005851322",
+        "KALIARTI000044253073",
+        "KALIARTI000005771131",
+        "KALIARTI000044253076",
+        "KALIARTI000005770888",
+        "KALIARTI000041458865",
+        "KALIARTI000041458852",
+        "KALIARTI000046033579",
+        "KALIARTI000005771274"
+      ]
+    },
+    {
+      "id": "p26",
+      "rappel@10": 1.0,
+      "mrr@10": 1.0,
+      "ndcg@10": 1.0,
+      "top10": [
+        "KALIARTI000046314492",
+        "KALIARTI000046314494",
+        "KALIARTI000046314499",
+        "KALIARTI000046314497",
+        "KALIARTI000046314490",
+        "KALIARTI000046314488",
+        "KALIARTI000046314500",
+        "KALIARTI000020549612",
+        "KALIARTI000020549610",
+        "KALIARTI000005770247"
+      ]
+    },
+    {
+      "id": "p27",
+      "rappel@10": 1.0,
+      "mrr@10": 1.0,
+      "ndcg@10": 1.0,
+      "top10": [
+        "KALIARTI000027172504",
+        "KALIARTI000027172506",
+        "KALIARTI000035980784",
+        "KALIARTI000038165571",
+        "KALIARTI000027172512",
+        "KALIARTI000038184185",
+        "KALIARTI000038165575",
+        "KALIARTI000026049964",
+        "KALIARTI000027172507",
+        "KALIARTI000038165588"
+      ]
+    },
+    {
+      "id": "p28",
+      "rappel@10": 1.0,
+      "mrr@10": 1.0,
+      "ndcg@10": 1.0,
+      "top10": [
+        "KALIARTI000005784453",
+        "KALIARTI000005842205",
+        "KALIARTI000005781062",
+        "KALIARTI000046366503",
+        "KALIARTI000027172350",
+        "KALIARTI000049508713",
+        "KALIARTI000044253070",
+        "KALIARTI000044906981",
+        "KALIARTI000051927550",
+        "KALIARTI000043929869"
+      ]
+    },
+    {
+      "id": "p29",
+      "rappel@10": 0.5,
+      "mrr@10": 0.1111111111111111,
+      "ndcg@10": 0.18457569677956817,
+      "top10": [
+        "LEGIARTI000019067635",
+        "KALIARTI000044253141",
+        "KALIARTI000047951741",
+        "KALIARTI000005770247",
+        "KALIARTI000020549612",
+        "KALIARTI000005865196",
+        "KALIARTI000046033577",
+        "KALIARTI000048052597",
+        "KALIARTI000044253063",
+        "KALIARTI000048052596"
+      ]
+    },
+    {
+      "id": "p30",
+      "rappel@10": 1.0,
+      "mrr@10": 1.0,
+      "ndcg@10": 0.8772153153380493,
+      "top10": [
+        "KALIARTI000005784453",
+        "LEGIARTI000006901113",
+        "LEGIARTI000006901129",
+        "LEGIARTI000006901112",
+        "LEGIARTI000006901117",
+        "LEGIARTI000006901114",
+        "LEGIARTI000017986924",
+        "LEGIARTI000006901118",
+        "KALIARTI000046315244",
+        "LEGIARTI000006900968"
+      ]
+    }
+  ],
+  "corpus": {
+    "@socialgouv/legi-data": {
+      "version": "2.565.0",
+      "integrity": "sha512-52L6KH3HsdkR8Ffpit45OAPgFjk9tzLvIwOG61rncGKUSMKSVCxmVI3eW0JP1dktOYt3u/CF+KrZwy4DLcnFQQ=="
+    },
+    "@socialgouv/kali-data": {
+      "version": "3.504.0",
+      "integrity": "sha512-cH4qpIktUeMmzbod0dFGEsPbmHtZr0Ma/tfNUhvrzpkdF40BdFzHxFhAXeOTMA9ly5kqGzCGYE8idL5sW2nfbw=="
+    }
+  }
+}

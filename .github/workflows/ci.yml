@@ -29,3 +29,5 @@ jobs:
           path: data/raw
           key: npm-${{ hashFiles('data/sources.json') }}
       - run: make test-corpus
+      - name: BM25 sur le jeu pilote
+        run: .venv/bin/python -m juriscope.eval.run_eval data/questions/pilote.jsonl >> "$GITHUB_STEP_SUMMARY"

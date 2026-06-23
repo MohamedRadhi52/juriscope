@@ -37,3 +37,26 @@ utilisées sont épinglées dans [data/sources.json](data/sources.json).
 Un article fait 491 caractères en médiane, 3 465 au 95e centile et jusqu'à 143 430 pour
 certaines annexes. 228 articles vides sont écartés, et 1 750 articles ont un texte identique
 à un autre (clauses types sur la durée d'un accord, par exemple).
+
+## Premiers résultats
+
+Jeu pilote de 30 questions (`data/questions/pilote.jsonl`), BM25 sur les 24 399 articles,
+intervalles de confiance à 95 % par bootstrap, latence de la recherche seule par question :
+
+| Configuration | rappel@10 [IC95] | MRR@10 [IC95] | nDCG@10 [IC95] | p95 (ms) |
+|---|---|---|---|---:|
+| BM25 | 0.567 [0.400, 0.717] | 0.286 [0.161, 0.430] | 0.345 [0.219, 0.482] | 1.5 |
+
+Ces chiffres donnent un ordre de grandeur, en attendant le jeu d'évaluation complet.
+Le premier diagnostic est déjà net. Sur les 11 questions ratées qui attendent un seul
+article, 9 ont en tête un article de convention qui reprend la règle du Code (la
+métallurgie surtout) : la vérité terrain ne retient que l'article du Code, et le jeu
+d'évaluation devra préciser la source attendue. Les autres échecs viennent du vocabulaire :
+"CSE" contre "comité social et économique", "mineur" contre "jeunes travailleurs", ce que
+la recherche dense devrait rattraper. Enfin, une question qui cite un numéro d'article
+remonte d'abord les articles qui citent ce numéro : une résolution directe des références
+est à prévoir.
+
+```bash
+make eval   # recalcule la ligne BM25 et écrit results/pilote/bm25.json
+```
