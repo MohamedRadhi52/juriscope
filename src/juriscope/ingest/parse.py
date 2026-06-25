@@ -18,7 +18,7 @@ from pathlib import Path
 CODE_DU_TRAVAIL = "LEGITEXT000006072050"
 
 # À incrémenter quand le schéma des articles change, pour reconstruire le corpus
-FORMAT = 1
+FORMAT = 2
 
 # Conventions retenues (docs/DECISIONS.md) et nom court affiché dans les citations
 CONVENTIONS = {
@@ -97,14 +97,15 @@ def kali_articles(convention: dict, idcc: str) -> Iterator[dict]:
                 yield from walk(child, [*path, clean(data["title"])], text)
                 continue
             num, heading = clean(data.get("num") or ""), clean(data.get("surtitre") or "")
-            label = f"art. {num}" if num else heading or path[-1]
+            # sans numéro ni intitulé, on nomme la section, sauf si c'est le texte lui-même
+            label = f"art. {num}" if num else heading or (path[-1] if len(path) > 2 else "")
             if num and heading:
                 label += f" : {heading}"
             yield {
                 "id": data["id"],
                 "cid": data["cid"],
                 "num": num,
-                "title": f"{name}, {text}, {label}",
+                "title": ", ".join(part for part in (name, text, label) if part),
                 "path": path,
                 "text": html_to_text(data.get("content") or ""),
                 "state": data["etat"],
