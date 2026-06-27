@@ -2,7 +2,7 @@ PYTHON ?= python3.14
 VENV := .venv
 BIN := $(VENV)/bin
 
-.PHONY: install lint format test data test-corpus eval
+.PHONY: install lint format test data test-corpus eval annotate
 
 install: $(VENV)/.installed
 
@@ -31,3 +31,6 @@ test-corpus: data
 
 eval: data
 	$(BIN)/python -m juriscope.eval.run_eval data/questions/pilote.jsonl
+
+annotate: data
+	$(BIN)/python -m juriscope.evalset.annotate

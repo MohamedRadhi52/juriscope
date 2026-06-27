@@ -98,3 +98,47 @@ Trente questions écrites à partir d'articles connus font tourner le banc en at
 jeu d'évaluation.
 Aucun réglage n'est fait sur ce jeu : ses chiffres donnent un ordre de grandeur, avec des
 intervalles larges, et le premier diagnostic d'erreurs.
+
+## Questions générées par Mistral
+
+Le jeu d'évaluation est écrit par `mistral-large-latest`, le modèle le plus capable de la
+gamme, car tout le projet se mesure sur lui. Le futur juge LLM viendra d'une autre famille
+de modèles, pour qu'un modèle ne note pas des questions dans son propre style. Le tirage des
+articles est fixé par une graine ; le modèle exact et les jetons consommés sont enregistrés
+avec chaque question.
+
+## Six types de questions, stratifiés
+
+| Type | Tirage | Nombre visé |
+|---|---|---:|
+| Factuelle, Code du travail | 15 par partie du Code (deux tiers législatifs) | 120 |
+| Factuelle, convention | 6 par convention | 60 |
+| Paraphrase éloignée | 5 par partie, rapportées à part | 40 |
+| Multi-articles | 5 paires d'articles voisins par partie | 40 |
+| Convention contre Code | 4 par convention, un article qui cite un article L | 40 |
+| Hors corpus | Code de la sécurité sociale, livres III, V et VIII | 40 |
+
+Les questions temporelles viendront de la comparaison de deux versions du corpus. Aucun
+article ne sert deux fois, et les articles propres à l'outre-mer sont écartés. Leçon du jeu
+pilote : une question tirée du Code ne nomme aucune convention, une question tirée d'une
+convention la nomme par son nom courant.
+
+## Questions hors corpus tirées de la sécurité sociale
+
+Le Code de la sécurité sociale est dans `legi-data` mais pas dans le corpus : une question
+écrite à partir de l'un de ses articles porte sur un sujet voisin du droit du travail, que
+l'assistant doit pourtant refuser. C'est plus réaliste que des questions sans rapport.
+
+## Vérifications automatiques
+
+Une question est rejetée si le modèle a jugé l'article inutilisable, si elle ne tient pas en
+une phrase interrogative de 5 à 45 mots, si l'extrait qui justifie la réponse ne figure pas
+mot pour mot dans l'article, si elle reprend 7 mots consécutifs du texte, ou, pour une
+paraphrase, si plus de 40 % de ses mots pleins figurent dans l'article. Les doublons sont
+retirés. Chaque rejet est compté par motif dans `results/evalset/verification.json`.
+
+## Jeu figé avant tout réglage
+
+Le jeu est séparé en développement (60 %) et test (40 %) dans chaque type, puis commité par
+le workflow `evalset`. Le générateur ne réécrit jamais une question déjà produite : relancer
+le workflow complète un jeu interrompu et ne change rien à un jeu complet.

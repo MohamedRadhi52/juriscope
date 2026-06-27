@@ -11,7 +11,7 @@ from pathlib import Path
 
 import numpy as np
 
-from juriscope.corpus import load_corpus
+from juriscope.corpus import load_corpus, read_jsonl
 from juriscope.eval.metrics import bootstrap_ci, ndcg_at_k, recall_at_k, reciprocal_rank
 from juriscope.paths import ROOT, SOURCES
 from juriscope.retrieve.bm25 import BM25
@@ -59,8 +59,7 @@ def main() -> None:
     parser.add_argument("--retriever", choices=RETRIEVERS, default="bm25")
     args = parser.parse_args()
 
-    with args.questions.open(encoding="utf-8") as f:
-        questions = [json.loads(line) for line in f]
+    questions = read_jsonl(args.questions)
     label, retriever_class = RETRIEVERS[args.retriever]
     result = evaluate(retriever_class(load_corpus()), questions)
     result["corpus"] = json.loads(SOURCES.read_text())

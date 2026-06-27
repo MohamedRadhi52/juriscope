@@ -17,6 +17,7 @@ make test      # tests unitaires
 make lint      # ruff
 make data      # télécharge et découpe le corpus (environ 35 Mo)
 make test-corpus  # vérifie des articles connus dans le corpus réel
+make annotate  # valide à la main un échantillon du jeu d'évaluation
 ```
 
 ## Données
@@ -37,6 +38,21 @@ utilisées sont épinglées dans [data/sources.json](data/sources.json).
 Un article fait 491 caractères en médiane, 3 465 au 95e centile et jusqu'à 143 430 pour
 certaines annexes. 228 articles vides sont écartés, et 1 750 articles ont un texte identique
 à un autre (clauses types sur la durée d'un accord, par exemple).
+
+## Jeu d'évaluation
+
+Les questions sont générées par Mistral à partir d'articles tirés au hasard, par partie du
+Code et par convention. L'article source sert de vérité terrain, ce qui dispense d'annoter
+pour mesurer la recherche. Six types sont couverts : questions factuelles, paraphrases sans
+les mots du texte, questions sur deux articles voisins, comparaisons entre une convention et
+le Code, et questions hors corpus tirées du Code de la sécurité sociale, pour lesquelles on
+attend un refus.
+
+Chaque question passe des vérifications automatiques : l'extrait cité doit figurer mot pour
+mot dans l'article, la question ne doit pas recopier le texte, et une paraphrase doit s'en
+éloigner vraiment. Le jeu est ensuite séparé en développement (60 %) et test (40 %), commité
+par le workflow `evalset` avant tout réglage de la recherche, et un échantillon de 80
+questions est relu à la main selon [docs/eval_guidelines.md](docs/eval_guidelines.md).
 
 ## Premiers résultats
 
