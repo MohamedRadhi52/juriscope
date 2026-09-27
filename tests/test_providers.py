@@ -28,13 +28,20 @@ def test_post_json_waits_and_retries_on_rate_limit(monkeypatch):
     assert len(calls) == 2
 
 
-def test_post_json_does_not_retry_client_errors(monkeypatch):
+def test_client_errors_are_not_retried_and_show_the_api_message(monkeypatch):
+    calls = []
+
     def fake_urlopen(request, timeout):
-        raise HTTPError(request.full_url, 401, "Unauthorized", {}, None)
+        calls.append(request)
+        body = io.BytesIO(b'{"message": "Unauthorized"}')
+        raise HTTPError(request.full_url, 401, "Unauthorized", {}, body)
 
     monkeypatch.setattr(providers, "urlopen", fake_urlopen)
-    with pytest.raises(HTTPError):
+    with pytest.raises(RuntimeError, match="a répondu 401") as error:
         providers.post_json("https://example.org", {}, {})
+    assert '"message": "Unauthorized"' in str(error.value)
+    assert len(calls) == 1
+    assert calls[0].get_header("User-agent") == "juriscope"
 
 
 def test_mistral_json_sends_json_mode_and_returns_usage(monkeypatch):
