@@ -65,6 +65,7 @@ CONVENTION = {
             section(
                 "Accord du 7 octobre 2015 relatif à la complémentaire santé",
                 kali_article("K3", "<p>Accord à durée indéterminée.</p>", heading="Durée"),
+                kali_article("K5", "<p>Les signataires conviennent de ce qui suit.</p>"),
             ),
         ),
         section(
@@ -96,12 +97,15 @@ def test_legi_articles_have_path_dates_and_validity():
 
 def test_kali_articles_skip_salaries_and_name_the_text():
     articles = list(parse.kali_articles(CONVENTION, "1486"))
-    assert [a["id"] for a in articles] == ["K1", "K2", "K3"]
-    base, _, attached = articles
+    assert [a["id"] for a in articles] == ["K1", "K2", "K3", "K5"]
+    base, _, attached, untitled = articles
     assert base["title"] == "Syntec (IDCC 1486), texte de base, art. 3.4 : Période d'essai"
     assert base["path"][0] == "Convention collective Syntec (IDCC 1486) : Bureaux d'études"
     assert attached["title"] == (
         "Syntec (IDCC 1486), Accord du 7 octobre 2015 relatif à la complémentaire santé, Durée"
+    )
+    assert untitled["title"] == (
+        "Syntec (IDCC 1486), Accord du 7 octobre 2015 relatif à la complémentaire santé"
     )
     assert all(a["idcc"] == ["1486"] and a["in_force"] for a in articles)
 
