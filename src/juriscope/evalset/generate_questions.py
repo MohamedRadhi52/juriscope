@@ -174,13 +174,12 @@ def generate(tasks: list[dict], output: Path, llm: Callable = mistral_json) -> i
     done = {row["id"] for row in read_jsonl(output)} if output.exists() else set()
     todo = [task for task in tasks if task["id"] not in done]
     output.parent.mkdir(parents=True, exist_ok=True)
-    with output.open("a", encoding="utf-8") as f:
-        for number, task in enumerate(todo, 1):
-            answer = llm(task["prompt"], MODEL, SEED + int(task["id"][1:]))
-            row = {key: value for key, value in task.items() if key != "prompt"}
+    for number, task in enumerate(todo, 1):
+        answer = llm(task["prompt"], MODEL, SEED + int(task["id"][1:]))
+        row = {key: value for key, value in task.items() if key != "prompt"}
+        with output.open("a", encoding="utf-8") as f:
             f.write(json.dumps(row | answer, ensure_ascii=False) + "\n")
-            f.flush()
-            print(f"{number}/{len(todo)} {task['id']} {task['type']}")
+        print(f"{number}/{len(todo)} {task['id']} {task['type']}")
     return len(todo)
 
 

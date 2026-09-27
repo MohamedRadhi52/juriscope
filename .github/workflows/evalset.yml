@@ -26,9 +26,16 @@ jobs:
           path: data/raw
           key: npm-${{ hashFiles('data/sources.json') }}
       - run: make data
-      - run: .venv/bin/python -m juriscope.evalset.generate_questions
+      - name: Génération des questions
+        shell: bash
+        run: .venv/bin/python -m juriscope.evalset.generate_questions 2>&1 | tee generation.log
         env:
           MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
+      # la dernière ligne du journal, souvent le message de l'API, devient une annotation
+      # visible sur la page du run sans être connecté
+      - name: Erreur de génération
+        if: failure()
+        run: echo "::error title=Génération::$(tail -n 1 generation.log)"
       - run: .venv/bin/python -m juriscope.evalset.verify
       # même après un échec, les questions déjà produites sont gardées pour la reprise
       - name: Commit du jeu
@@ -38,7 +45,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/questions results/evalset
+          git add data/questions results
           git diff --cached --quiet || git commit -m "$MESSAGE"
           git pull --rebase
           git push
