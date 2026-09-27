@@ -1,0 +1,40 @@
+name: evalset
+
+# Génère le jeu d'évaluation avec Mistral, le vérifie et le commite. Le générateur ne
+# réécrit jamais une question existante : relancer complète un jeu interrompu.
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/evalset.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  evalset:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+          cache: pip
+      - uses: actions/cache@v6
+        with:
+          path: data/raw
+          key: npm-${{ hashFiles('data/sources.json') }}
+      - run: make data
+      - run: .venv/bin/python -m juriscope.evalset.generate_questions
+        env:
+          MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
+      - run: .venv/bin/python -m juriscope.evalset.verify
+      - name: Commit du jeu
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/questions results/evalset
+          git diff --cached --quiet || git commit -m "Jeu d'évaluation généré et vérifié"
+          git pull --rebase
+          git push
