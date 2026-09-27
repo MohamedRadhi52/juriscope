@@ -52,3 +52,25 @@ secteur financier.
 | 3043 | Entreprises de propreté et services associés | 367 142 |
 | 2120 | Banque | 216 431 |
 | 1672 | Sociétés d'assurances | 140 739 |
+
+## Articles en vigueur seulement
+
+Un article du Code du travail entre dans l'index s'il est applicable à la date de la version
+du code (`dateDebutVersion`). Les articles à abrogation différée, 117 dans la version
+épinglée, y restent jusqu'à leur date de fin. KALI ne donne pas de dates par article : l'état
+doit commencer par `VIGUEUR`, étendu ou non. Les paquets npm ne contiennent que les textes
+en vigueur ; l'historique utile à la veille vient de la comparaison de deux versions, dont
+les archives restent dans `data/raw`.
+
+## Titre complet pour les articles de convention
+
+Dans une même convention, les numéros d'articles se répètent d'un accord à l'autre (Syntec
+compte plusieurs articles 3.3). Le titre cité nomme donc le texte : "Syntec (IDCC 1486),
+Accord du 7 octobre 2015 relatif à la complémentaire santé, art. 3.3 : Conditions d'octroi".
+Le chemin hiérarchique complet est gardé avec chaque article.
+
+## Articles communs à deux conventions
+
+Les 20 articles de l'accord créant l'OPCABAIA figurent dans les conventions de la banque et
+des sociétés d'assurances. Ils sont fusionnés en un seul article rattaché aux deux IDCC,
+pour ne pas occuper deux places dans les résultats.

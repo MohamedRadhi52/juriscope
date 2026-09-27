@@ -18,3 +18,5 @@ select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+addopts = "-m 'not corpus'"
+markers = ["corpus: tests sur le corpus réel, à lancer après make data"]

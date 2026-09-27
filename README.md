@@ -15,7 +15,8 @@ Prérequis : Python 3.14 et `make`.
 make install   # crée .venv, installe les dépendances et le hook pre-commit
 make test      # tests unitaires
 make lint      # ruff
-make data      # télécharge le corpus (environ 35 Mo)
+make data      # télécharge et découpe le corpus (environ 35 Mo)
+make test-corpus  # vérifie des articles connus dans le corpus réel
 ```
 
 ## Données
@@ -26,3 +27,13 @@ ministères sociaux dans les paquets npm
 [`@socialgouv/legi-data`](https://www.npmjs.com/package/@socialgouv/legi-data) et
 [`@socialgouv/kali-data`](https://www.npmjs.com/package/@socialgouv/kali-data). Les versions
 utilisées sont épinglées dans [data/sources.json](data/sources.json).
+
+| Corpus (versions épinglées) | Articles en vigueur |
+|---|---:|
+| Code du travail (articles L, R, D et annexes) | 11 595 |
+| 10 conventions collectives, texte de base et textes attachés | 12 804 |
+| Total | 24 399 |
+
+Un article fait 491 caractères en médiane, 3 465 au 95e centile et jusqu'à 143 430 pour
+certaines annexes. 228 articles vides sont écartés, et 1 750 articles ont un texte identique
+à un autre (clauses types sur la durée d'un accord, par exemple).
