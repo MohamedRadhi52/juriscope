@@ -1,0 +1,26 @@
+name: keepalive
+
+# GitHub désactive les workflows planifiés d'un dépôt public après 60 jours
+# sans activité. Réactiver chaque workflow par l'API remet ce compteur à zéro.
+on:
+  schedule:
+    - cron: "0 6 1 * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [.github/workflows/keepalive.yml]
+
+permissions:
+  actions: write
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          for id in $(gh api "repos/$REPO/actions/workflows" --jq '.workflows[].id'); do
+            gh api --method PUT "repos/$REPO/actions/workflows/$id/enable"
+          done
