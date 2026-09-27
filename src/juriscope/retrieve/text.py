@@ -18,12 +18,17 @@ TOKEN = re.compile(
 STEMMER = Stemmer.Stemmer("french")
 
 
+def fold(text: str) -> str:
+    """Texte sans accents ni ligatures : État devient Etat, œuvre devient oeuvre."""
+    text = text.replace("œ", "oe").replace("Œ", "OE").replace("æ", "ae")
+    return unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode()
+
+
 @cache
 def stem(word: str) -> str:
     """Racine sans accents : les accents sont retirés avant, pour que salariés et salaries
     donnent la même racine."""
-    folded = unicodedata.normalize("NFKD", word.replace("œ", "oe").replace("æ", "ae"))
-    return STEMMER.stemWord(folded.encode("ascii", "ignore").decode())
+    return STEMMER.stemWord(fold(word))
 
 
 def tokenize(text: str) -> list[str]:

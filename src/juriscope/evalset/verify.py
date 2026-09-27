@@ -13,7 +13,7 @@ from juriscope.corpus import load_corpus, read_jsonl
 from juriscope.evalset.generate_questions import OUTPUT as GENERATED
 from juriscope.evalset.generate_questions import load_css
 from juriscope.paths import DATA, ROOT
-from juriscope.retrieve.text import tokenize
+from juriscope.retrieve.text import fold, tokenize
 
 EVAL = DATA / "questions" / "eval.jsonl"
 REPORT = ROOT / "results" / "evalset" / "verification.json"
@@ -24,7 +24,20 @@ SEED = 2026
 
 
 def words(text: str) -> list[str]:
-    return re.findall(r"\w+", text.lower())
+    return re.findall(r"\w+", fold(text).lower())
+
+
+def quoted(extract: str, text: str) -> bool:
+    """Vrai si l'extrait figure dans le texte ; une coupure [...] sépare des morceaux."""
+    parts = [words(part) for part in re.split(r"\[\.\.\.\]|\(\.\.\.\)|\.\.\.|…", extract)]
+    padded = f" {' '.join(words(text))} "
+    return sum(map(len, parts)) >= 3 and all(f" {' '.join(p)} " in padded for p in parts if p)
+
+
+def as_question(text: str) -> str:
+    """Question sans espaces superflus, terminée par un point d'interrogation plutôt qu'un point."""
+    text = text.strip()
+    return text[:-1].rstrip() + " ?" if text.endswith(".") else text
 
 
 def copied_words(question: str, text: str) -> int:
@@ -55,15 +68,14 @@ def parse_output(raw: str) -> dict | None:
 
 def rejection(output: dict, kind: str, texts: list[str]) -> str | None:
     """Motif de rejet d'une question générée, ou None si elle passe les vérifications."""
-    question = output.get("question", "")
+    question = as_question(output.get("question", ""))
     if not question:
         return "article sans question utile"
     if not question.endswith("?") or not 5 <= len(words(question)) <= 45:
         return "forme de la question"
     extracts = output.get("extraits") or [output.get("extrait", "")]
     if len(extracts) != len(texts) or not all(
-        len(words(e)) >= 3 and " ".join(words(e)) in " ".join(words(t))
-        for e, t in zip(extracts, texts, strict=True)
+        quoted(e, t) for e, t in zip(extracts, texts, strict=True)
     ):
         return "extrait absent de l'article"
     if max(copied_words(question, t) for t in texts) >= MAX_COPIED_WORDS:
@@ -96,7 +108,8 @@ def main() -> None:
         reason = (
             "réponse JSON invalide" if output is None else rejection(output, item["type"], texts)
         )
-        key = " ".join(words(output.get("question", ""))) if output else ""
+        question = as_question(output.get("question", "")) if output else ""
+        key = " ".join(words(question))
         if reason is None and key in seen:
             reason = "question en double"
         if reason:
@@ -106,7 +119,7 @@ def main() -> None:
         row = {
             "id": item["id"],
             "type": item["type"],
-            "question": output["question"],
+            "question": question,
             "answer": output.get("reponse", ""),
             "relevant": item["relevant"],
             "refs": [s["title"] for s in item["sources"] if s["cid"] in item["relevant"]],

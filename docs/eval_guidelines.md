@@ -11,9 +11,10 @@ Chaque question reçoit deux avis. En cas de doute, répondre non et laisser un 
 
 ## Question claire
 
-Oui si la question est unique, compréhensible sans l'article, sans ambiguïté sur ce qui est
-demandé, et formulée comme un salarié ou un employeur pourrait le faire. Non si elle suppose
-d'avoir lu l'article, mélange deux questions ou reste vague.
+Oui si la question est compréhensible sans l'article, sans ambiguïté sur ce qui est demandé,
+et formulée comme un salarié ou un employeur pourrait le faire. Non si elle suppose d'avoir
+lu l'article, mélange deux sujets sans lien ou reste vague. Une question multi-articles peut
+avoir deux volets liés : c'est attendu pour ce type.
 
 ## Réponse attendue correcte
 
