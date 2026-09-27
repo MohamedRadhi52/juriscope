@@ -2,7 +2,7 @@ PYTHON ?= python3.14
 VENV := .venv
 BIN := $(VENV)/bin
 
-.PHONY: install lint format
+.PHONY: install lint format test data
 
 install: $(VENV)/.installed
 
@@ -19,3 +19,9 @@ lint: install
 format: install
 	$(BIN)/ruff check --fix .
 	$(BIN)/ruff format .
+
+test: install
+	$(BIN)/pytest
+
+data: install
+	$(BIN)/python -m juriscope.ingest
