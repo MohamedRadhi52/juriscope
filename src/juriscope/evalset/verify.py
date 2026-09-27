@@ -45,8 +45,10 @@ def overlap(question: str, text: str) -> float:
 
 
 def parse_output(raw: str) -> dict | None:
+    """Objet JSON de la réponse, même entouré de texte ou d'un bloc de code."""
+    start, end = raw.find("{"), raw.rfind("}")
     try:
-        return json.loads(raw)
+        return json.loads(raw[start : end + 1])
     except json.JSONDecodeError:
         return None
 
@@ -120,7 +122,8 @@ def main() -> None:
     types = Counter(item["type"] for item in generated)
     report = {
         "modeles": Counter(item["model"] for item in generated),
-        "jetons": sum(item["usage"]["total_tokens"] for item in generated),
+        "jetons_entree": sum(item["usage"]["input_tokens"] for item in generated),
+        "jetons_sortie": sum(item["usage"]["output_tokens"] for item in generated),
         "questions_generees": len(generated),
         "questions_gardees": len(kept),
         "par_type": {

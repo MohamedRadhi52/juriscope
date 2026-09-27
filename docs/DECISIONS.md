@@ -99,13 +99,17 @@ jeu d'évaluation.
 Aucun réglage n'est fait sur ce jeu : ses chiffres donnent un ordre de grandeur, avec des
 intervalles larges, et le premier diagnostic d'erreurs.
 
-## Questions générées par Mistral
+## Questions générées par l'API Anthropic
 
-Le jeu d'évaluation est écrit par `mistral-large-latest`, le modèle le plus capable de la
-gamme, car tout le projet se mesure sur lui. Le futur juge LLM viendra d'une autre famille
-de modèles, pour qu'un modèle ne note pas des questions dans son propre style. Le tirage des
-articles est fixé par une graine ; le modèle exact et les jetons consommés sont enregistrés
-avec chaque question.
+Le plan prévoyait de confier la génération à Mistral, pour que le futur juge LLM vienne d'une
+autre famille de modèles. Le forfait gratuit de Mistral n'active plus les clés API, et un
+abonnement mensuel ne se justifiait pas pour quelques centaines de questions : elles sont
+écrites par Haiku 4.5, le plus petit modèle de l'API Anthropic, pour moins d'un dollar.
+Conséquence assumée : générateur et juge viendront du même fournisseur. Deux garde-fous
+limitent le biais : le juge utilisera un autre modèle que le générateur, et il sera validé
+contre des étiquettes humaines (kappa de Cohen). Mistral reste disponible comme fournisseur
+(`--provider mistral`). Le tirage des articles est fixé par une graine ; le modèle exact et
+les jetons consommés sont enregistrés avec chaque question.
 
 ## Six types de questions, stratifiés
 

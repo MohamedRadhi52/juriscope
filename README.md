@@ -41,8 +41,8 @@ certaines annexes. 228 articles vides sont écartés, et 1 750 articles ont un t
 
 ## Jeu d'évaluation
 
-Les questions sont générées par Mistral à partir d'articles tirés au hasard, par partie du
-Code et par convention. L'article source sert de vérité terrain, ce qui dispense d'annoter
+Les questions sont générées par un modèle de l'API Anthropic (Haiku 4.5) à partir d'articles
+tirés au hasard, par partie du Code et par convention. L'article source sert de vérité terrain, ce qui dispense d'annoter
 pour mesurer la recherche. Six types sont couverts : questions factuelles, paraphrases sans
 les mots du texte, questions sur deux articles voisins, comparaisons entre une convention et
 le Code, et questions hors corpus tirées du Code de la sécurité sociale, pour lesquelles on

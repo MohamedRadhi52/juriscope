@@ -1,4 +1,7 @@
-"""Appels HTTP aux fournisseurs de modèles de langage."""
+"""Appels HTTP aux fournisseurs de modèles de langage.
+
+Chaque fonction renvoie le même dict : modèle exact, texte produit et jetons consommés.
+"""
 
 import json
 import os
@@ -6,6 +9,7 @@ import time
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
+ANTHROPIC_URL = "https://api.anthropic.com/v1/messages"
 MISTRAL_URL = "https://api.mistral.ai/v1/chat/completions"
 
 
@@ -25,14 +29,35 @@ def post_json(url: str, payload: dict, headers: dict, attempts: int = 8) -> dict
             time.sleep(2**attempt)
 
 
-def mistral_json(prompt: str, model: str, seed: int) -> dict:
-    """Réponse d'un modèle Mistral en mode JSON, avec le modèle exact et l'usage en jetons."""
+def anthropic_complete(prompt: str, model: str) -> dict:
+    payload = {
+        "model": model,
+        "max_tokens": 1024,
+        "temperature": 0.7,
+        "messages": [{"role": "user", "content": prompt}],
+    }
+    headers = {
+        "x-api-key": os.environ["ANTHROPIC_API_KEY"],
+        "anthropic-version": "2023-06-01",
+        "Content-Type": "application/json",
+    }
+    data = post_json(ANTHROPIC_URL, payload, headers)
+    return {
+        "model": data["model"],
+        "output": data["content"][0]["text"],
+        "usage": {
+            "input_tokens": data["usage"]["input_tokens"],
+            "output_tokens": data["usage"]["output_tokens"],
+        },
+    }
+
+
+def mistral_complete(prompt: str, model: str) -> dict:
     payload = {
         "model": model,
         "messages": [{"role": "user", "content": prompt}],
         "response_format": {"type": "json_object"},
         "temperature": 0.7,
-        "random_seed": seed,
     }
     headers = {
         "Authorization": f"Bearer {os.environ['MISTRAL_API_KEY']}",
@@ -42,5 +67,8 @@ def mistral_json(prompt: str, model: str, seed: int) -> dict:
     return {
         "model": data["model"],
         "output": data["choices"][0]["message"]["content"],
-        "usage": data["usage"],
+        "usage": {
+            "input_tokens": data["usage"]["prompt_tokens"],
+            "output_tokens": data["usage"]["completion_tokens"],
+        },
     }

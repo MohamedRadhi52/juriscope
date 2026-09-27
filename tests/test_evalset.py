@@ -67,12 +67,12 @@ def test_generation_resumes_without_rewriting(tmp_path):
     ]
     output = tmp_path / "generated.jsonl"
 
-    def llm(prompt, model, seed):
-        return {"model": model, "output": "{}", "usage": {"total_tokens": 1}}
+    def complete(prompt, model):
+        return {"model": model, "output": "{}", "usage": {"input_tokens": 1, "output_tokens": 1}}
 
-    assert generate_questions.generate(tasks[:2], output, llm) == 2
-    assert generate_questions.generate(tasks, output, llm) == 1
-    assert generate_questions.generate(tasks, output, llm) == 0
+    assert generate_questions.generate(tasks[:2], output, complete, "modele") == 2
+    assert generate_questions.generate(tasks, output, complete, "modele") == 1
+    assert generate_questions.generate(tasks, output, complete, "modele") == 0
     rows = read_jsonl(output)
     assert [r["id"] for r in rows] == ["q0001", "q0002", "q0003"]
     assert "prompt" not in rows[0]
@@ -99,6 +99,12 @@ def test_rejection_reasons():
     assert verify.rejection(copied, "factuelle", [text]) == "question recopiée du texte"
     close = good | {"question": "Quelle durée légale de travail effectif par semaine ?"}
     assert verify.rejection(close, "paraphrase", [text]) == "paraphrase trop proche du texte"
+
+
+def test_json_is_found_around_text_and_code_fences():
+    raw = 'Voici la question :\n```json\n{"question": "Q ?", "extrait": "a b c"}\n```'
+    assert verify.parse_output(raw) == {"question": "Q ?", "extrait": "a b c"}
+    assert verify.parse_output("pas de JSON") is None
 
 
 def test_split_keeps_the_same_share_in_each_type():
