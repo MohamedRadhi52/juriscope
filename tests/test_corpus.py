@@ -1,7 +1,10 @@
+import json
+
 import pytest
 
 from juriscope.corpus import load_corpus
 from juriscope.ingest.parse import CONVENTIONS
+from juriscope.paths import DATA
 
 pytestmark = pytest.mark.corpus
 
@@ -37,3 +40,10 @@ def test_corpus_has_unique_cids_and_only_articles_in_force(articles):
     assert all(a["text"] and a["in_force"] for a in articles)
     assert sum(1 for a in articles if not a["idcc"]) > 11_000
     assert {idcc for a in articles for idcc in a["idcc"]} == set(CONVENTIONS)
+
+
+def test_pilot_questions_point_to_articles_of_the_corpus(articles):
+    titles = {a["cid"]: a["title"] for a in articles}
+    lines = (DATA / "questions" / "pilote.jsonl").read_text(encoding="utf-8").splitlines()
+    for question in map(json.loads, lines):
+        assert [titles[cid] for cid in question["relevant"]] == question["refs"]

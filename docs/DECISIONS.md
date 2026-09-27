@@ -74,3 +74,27 @@ Le chemin hiérarchique complet est gardé avec chaque article.
 Les 20 articles de l'accord créant l'OPCABAIA figurent dans les conventions de la banque et
 des sociétés d'assurances. Ils sont fusionnés en un seul article rattaché aux deux IDCC,
 pour ne pas occuper deux places dans les résultats.
+
+## Tokenisation française pour BM25
+
+Les accents sont retirés avant la racinisation Snowball, pour que "salariés" et "salaries"
+donnent la même racine : sur 15 groupes de variantes testés (accents, pluriels), cet ordre en
+réunit 11, contre 8 dans l'ordre inverse. Les particules élidées (l', qu', jusqu') et les mots vides sont
+retirés. Les sigles restent tels quels et ne sont jamais des mots vides : "le CE" n'est pas
+le pronom "ce". Les références d'articles sont normalisées, "L. 1234-1" et "L1234-1" donnent
+le même jeton.
+
+## Texte indexé : chemin, titre et texte
+
+Beaucoup d'articles ne portent pas les mots de leur contexte : aucun article de la
+convention Syntec ne contient "Syntec", qui n'apparaît que dans le chemin. Le texte indexé
+réunit donc le chemin hiérarchique, le titre et le texte. Cette règle est fixée avant
+d'avoir le jeu d'évaluation ; sa variante sans chemin sera comparée sur le jeu de
+développement.
+
+## Jeu pilote avant le jeu d'évaluation
+
+Trente questions écrites à partir d'articles connus font tourner le banc en attendant le
+jeu d'évaluation.
+Aucun réglage n'est fait sur ce jeu : ses chiffres donnent un ordre de grandeur, avec des
+intervalles larges, et le premier diagnostic d'erreurs.
