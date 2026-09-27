@@ -62,25 +62,24 @@ def main() -> None:
     articles = {a["cid"]: a for a in load_corpus()}
     done = {row["id"] for row in read_jsonl(VALIDATION)} if VALIDATION.exists() else set()
     todo = [q for q in sample(read_jsonl(EVAL), args.n, SEED) if q["id"] not in done]
-    with VALIDATION.open("a", encoding="utf-8") as f:
-        for position, question in enumerate(todo, len(done) + 1):
-            show(question, position, args.n, articles)
-            clear = ask("\nQuestion claire ? [o/n, q pour quitter] ")
-            if clear == "q":
-                break
-            if question["relevant"]:
-                prompt = "Réponse attendue bien dans l'article ? [o/n, q] "
-            else:
-                prompt = "Question bien hors du Code du travail et des conventions ? [o/n, q] "
-            expected = ask(prompt)
-            if expected == "q":
-                break
-            comment = input("Commentaire (Entrée pour passer) : ").strip()
-            row = {"id": question["id"], "clear": clear == "o", "expected_ok": expected == "o"}
+    for position, question in enumerate(todo, len(done) + 1):
+        show(question, position, args.n, articles)
+        clear = ask("\nQuestion claire ? [o/n, q pour quitter] ")
+        if clear == "q":
+            break
+        if question["relevant"]:
+            prompt = "Réponse attendue bien dans l'article ? [o/n, q] "
+        else:
+            prompt = "Question bien hors du Code du travail et des conventions ? [o/n, q] "
+        expected = ask(prompt)
+        if expected == "q":
+            break
+        comment = input("Commentaire (Entrée pour passer) : ").strip()
+        row = {"id": question["id"], "clear": clear == "o", "expected_ok": expected == "o"}
+        with VALIDATION.open("a", encoding="utf-8") as f:
             f.write(json.dumps(row | {"comment": comment}, ensure_ascii=False) + "\n")
-            f.flush()
 
-    rows = read_jsonl(VALIDATION)
+    rows = read_jsonl(VALIDATION) if VALIDATION.exists() else []
     clear, correct = sum(r["clear"] for r in rows), sum(r["expected_ok"] for r in rows)
     print(f"\n{len(rows)} questions validées : {clear} claires, {correct} avec la bonne réponse.")
 
