@@ -1,0 +1,11 @@
+{
+  "questions": 80,
+  "reponses_illisibles": 0,
+  "refus_corrects": 0.9375,
+  "refus_a_tort": 0.171875,
+  "citations_dans_le_contexte": 0.9814814814814815,
+  "article_attendu_cite": 0.578125,
+  "latence_p50_s": 3.5712022855000214,
+  "latence_p95_s": 6.028588365300001,
+  "cout_1000_requetes": 8.842475
+}
