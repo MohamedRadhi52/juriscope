@@ -11,6 +11,23 @@ from urllib.request import Request, urlopen
 
 ANTHROPIC_URL = "https://api.anthropic.com/v1/messages"
 MISTRAL_URL = "https://api.mistral.ai/v1/chat/completions"
+# dollars par million de jetons, en entrée puis en sortie (tarifs publics, septembre 2026)
+PRICES = {"claude-haiku-4-5-20251001": (1.0, 5.0)}
+
+
+def cost(usages: list[dict], model: str) -> float:
+    """Coût en dollars d'une série d'appels."""
+    price_in, price_out = PRICES[model]
+    return sum(u["input_tokens"] * price_in + u["output_tokens"] * price_out for u in usages) / 1e6
+
+
+def extract_json(text: str) -> dict | None:
+    """Objet JSON d'une réponse, même entouré de texte ou d'un bloc de code."""
+    start, end = text.find("{"), text.rfind("}")
+    try:
+        return json.loads(text[start : end + 1])
+    except json.JSONDecodeError:
+        return None
 
 
 def post_json(url: str, payload: dict, headers: dict, attempts: int = 8) -> dict:

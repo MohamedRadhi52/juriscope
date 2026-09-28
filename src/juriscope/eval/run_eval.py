@@ -13,16 +13,25 @@ import numpy as np
 
 from juriscope.corpus import load_corpus, read_jsonl
 from juriscope.eval.metrics import bootstrap_ci, ndcg_at_k, recall_at_k, reciprocal_rank
+from juriscope.generate.providers import anthropic_complete
 from juriscope.paths import ROOT, SOURCES
 from juriscope.retrieve.bm25 import BM25
 from juriscope.retrieve.dense import Dense
+from juriscope.retrieve.fusion import Hybrid
+from juriscope.retrieve.rerank import Rerank
 
-RETRIEVERS = {"bm25": "BM25", "dense": "Dense (e5-small)"}
+RETRIEVERS = {
+    "bm25": "BM25",
+    "dense": "Dense (e5-small)",
+    "hybride": "Hybride RRF",
+    "rerank": "Hybride + reranker",
+}
+RERANK_MODEL = "claude-haiku-4-5-20251001"
 METRICS = {"rappel@10": recall_at_k, "mrr@10": reciprocal_rank, "ndcg@10": ndcg_at_k}
 K = 10
 HEADER = (
-    "| Configuration | rappel@10 [IC95] | MRR@10 [IC95] | nDCG@10 [IC95] | p95 (ms) |\n"
-    "|---|---|---|---|---:|"
+    "| Configuration | rappel@10 [IC95] | MRR@10 [IC95] | nDCG@10 [IC95] | p95 (ms) "
+    "| $ / 1 000 q |\n|---|---|---|---|---:|---:|"
 )
 
 
@@ -30,7 +39,12 @@ def build(name: str, articles: list[dict]):
     """Méthode de recherche à évaluer ; chaque méthode s'appuie sur les précédentes."""
     if name == "bm25":
         return BM25(articles)
-    return Dense.from_index()
+    if name == "dense":
+        return Dense.from_index()
+    hybrid = Hybrid([BM25(articles), Dense.from_index()])
+    if name == "hybride":
+        return hybrid
+    return Rerank(hybrid, {a["cid"]: a for a in articles}, anthropic_complete, RERANK_MODEL)
 
 
 def evaluate(retriever, questions: list[dict]) -> dict:
@@ -49,6 +63,10 @@ def evaluate(retriever, questions: list[dict]) -> dict:
         summary[name] = {"moyenne": float(np.mean(values)), "ic95": bootstrap_ci(values)}
     p50, p95 = np.percentile(latencies, [50, 95]) * 1000
     summary["latence_ms"] = {"p50": float(p50), "p95": float(p95)}
+    summary["cout_1000_requetes"] = 0.0
+    if isinstance(retriever, Rerank):
+        summary["cout_1000_requetes"] = 1000 * retriever.cost() / len(details)
+        summary["reclassements_illisibles"] = retriever.unparsed
     summary["rappel@10_par_type"] = {
         kind: float(np.mean([row["rappel@10"] for row in details if row["type"] == kind]))
         for kind in sorted({row["type"] for row in details})
@@ -62,6 +80,7 @@ def table_row(label: str, result: dict) -> str:
         low, high = result[name]["ic95"]
         cells.append(f"{result[name]['moyenne']:.3f} [{low:.3f}, {high:.3f}]")
     cells.append(f"{result['latence_ms']['p95']:.1f}")
+    cells.append(f"{result['cout_1000_requetes']:.2f}")
     return "| " + " | ".join(cells) + " |"
 
 
