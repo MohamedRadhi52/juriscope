@@ -25,8 +25,20 @@ articles utilisés]}}"""
 TEXT_CHARS = 1500
 
 
-def answer(question: str, retriever, articles: dict, complete: Callable, model: str, k: int = 5):
-    """Réponse, citations vérifiées et trace de la requête (latences, jetons, coût)."""
+def answer(
+    question: str,
+    retriever,
+    articles: dict,
+    complete: Callable,
+    model: str,
+    k: int = 5,
+    changed: frozenset = frozenset(),
+):
+    """Réponse, citations vérifiées et trace de la requête (latences, jetons, coût).
+
+    changed contient les articles modifiés depuis la version précédente du corpus : ceux que
+    la réponse cite sont signalés.
+    """
     start = time.perf_counter()
     context = retriever.search(question, k)
     retrieved = time.perf_counter()
@@ -39,6 +51,7 @@ def answer(question: str, retriever, articles: dict, complete: Callable, model: 
 
     data = extract_json(generation["output"]) or {}
     numbers = [n for n in data.get("citations", []) if isinstance(n, int)]
+    cited = [context[n - 1] for n in numbers if 1 <= n <= len(context)]
     spent = cost([generation["usage"]], model)
     if isinstance(retriever, Rerank):
         spent += cost(retriever.usage[-1:], retriever.model)
@@ -48,7 +61,8 @@ def answer(question: str, retriever, articles: dict, complete: Callable, model: 
         "lisible": bool(data),
         "refus": bool(data.get("refus")),
         "reponse": data.get("reponse", ""),
-        "citations": [context[n - 1] for n in numbers if 1 <= n <= len(context)],
+        "citations": cited,
+        "articles_modifies": [cid for cid in cited if cid in changed],
         "citations_hors_contexte": sum(1 for n in numbers if not 1 <= n <= len(context)),
         "latence_ms": {
             "recherche": 1000 * (retrieved - start),

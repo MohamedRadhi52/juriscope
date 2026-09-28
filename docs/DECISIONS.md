@@ -296,3 +296,13 @@ gonflerait son kappa ; il faudrait de nouvelles étiquettes. La qualité de la g
 donc mesurée par l'annotation humaine, et la CI contrôlera la génération avec des critères
 vérifiables : citations présentes dans le contexte, refus des questions hors corpus, article
 attendu parmi les citations.
+
+## Veille des textes par identifiant commun
+
+Deux versions du corpus se comparent par identifiant commun (`cid`) : un article ajouté ou
+supprimé change d'ensemble, un article modifié garde son `cid` mais change de texte. Les
+questions d'évaluation dont un article attendu est modifié ou supprimé sont signalées, et
+chaque article du Code modifié donne une question temporelle sur sa rédaction en vigueur.
+Le workflow `veille` fait cette comparaison chaque lundi entre le corpus épinglé et les
+dernières versions publiées ; le workflow `keepalive` l'empêche d'être désactivé. Une réponse
+qui cite un article modifié depuis la version précédente le signale.

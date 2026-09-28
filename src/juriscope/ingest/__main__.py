@@ -18,7 +18,7 @@ def main() -> None:
 
     if args.check or args.update:
         for package, pin in sources.items():
-            last = npm.latest(package)
+            last = npm.release(package)
             if last["version"] == pin["version"]:
                 print(f"{package} {pin['version']} : à jour")
             else:

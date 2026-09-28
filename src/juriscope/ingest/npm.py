@@ -34,8 +34,8 @@ def ensure_tarball(package: str, version: str, expected: str, raw_dir: Path) -> 
     return path
 
 
-def latest(package: str) -> dict:
-    """Dernière version publiée d'un paquet et son empreinte."""
-    with urlopen(f"{REGISTRY}/{package}/latest", timeout=30) as response:
+def release(package: str, version: str = "latest") -> dict:
+    """Version publiée d'un paquet (la dernière par défaut) et son empreinte."""
+    with urlopen(f"{REGISTRY}/{package}/{version}", timeout=30) as response:
         meta = json.load(response)
     return {"version": meta["version"], "integrity": meta["dist"]["integrity"]}

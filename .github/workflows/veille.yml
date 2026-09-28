@@ -1,0 +1,28 @@
+name: veille
+
+# Chaque lundi, compare le corpus épinglé aux dernières versions publiées sur npm et résume
+# les articles ajoutés, supprimés ou modifiés, avec les questions d'évaluation à revoir.
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [src/juriscope/ingest/diff.py, .github/workflows/veille.yml]
+
+jobs:
+  veille:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+          cache: pip
+      - uses: actions/cache@v6
+        with:
+          path: data/raw
+          key: npm-${{ hashFiles('data/sources.json') }}
+      - run: make data
+      - run: .venv/bin/python -m juriscope.ingest.diff --new latest >> "$GITHUB_STEP_SUMMARY"

@@ -154,6 +154,15 @@ de R@100 [-0,012 ; +0,065], un gain que l'intervalle ne distingue pas de zéro. 
 gagne près de 8 points sur BM25 seul. À titre de repère, le meilleur modèle de l'article
 original, entraîné sur BSARD, atteint 74,8 %.
 
+## Veille des modifications
+
+Entre les versions de fin juillet 2026 (legi-data 2.552.0, kali-data 3.485.0) et les
+versions épinglées de septembre, 112 articles ont été ajoutés, 40 supprimés et 30 modifiés.
+Aucune question du jeu d'évaluation ne s'appuie sur un article modifié ou supprimé : le jeu
+reste valide. Les 13 articles du Code modifiés donnent autant de questions temporelles
+(`data/questions/temporelles.jsonl`), et le workflow `veille` refait la comparaison chaque
+lundi avec les dernières versions publiées.
+
 ```bash
 make eval   # recalcule la ligne BM25 sur le jeu de développement
 ```

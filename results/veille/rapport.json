@@ -1,0 +1,136 @@
+{
+  "de": {
+    "@socialgouv/legi-data": "2.552.0",
+    "@socialgouv/kali-data": "3.485.0"
+  },
+  "vers": {
+    "@socialgouv/legi-data": "2.565.0",
+    "@socialgouv/kali-data": "3.504.0"
+  },
+  "ajoutes": 112,
+  "supprimes": 40,
+  "modifies": 30,
+  "questions_touchees": [],
+  "articles_modifies": [
+    {
+      "cid": "KALIARTI000026951508",
+      "titre": "Transports routiers (IDCC 0016), Accord du 1er octobre 2012 relatif à la protection santé (transport de marchandises), Annexe"
+    },
+    {
+      "cid": "KALIARTI000031985917",
+      "titre": "Transports routiers (IDCC 0016), Accord du 25 septembre 2015 relatif à la complémentaire des frais de santé, Annexes"
+    },
+    {
+      "cid": "KALIARTI000031985918",
+      "titre": "Transports routiers (IDCC 0016), Accord du 25 septembre 2015 relatif à la complémentaire des frais de santé, Annexes"
+    },
+    {
+      "cid": "KALIARTI000031985919",
+      "titre": "Transports routiers (IDCC 0016), Accord du 25 septembre 2015 relatif à la complémentaire des frais de santé, Annexes"
+    },
+    {
+      "cid": "KALIARTI000031985957",
+      "titre": "Transports routiers (IDCC 0016), Accord du 6 octobre 2015 relatif à la complémentaire des frais de santé (transport sanitaire), art. Annexe I"
+    },
+    {
+      "cid": "KALIARTI000031985958",
+      "titre": "Transports routiers (IDCC 0016), Accord du 6 octobre 2015 relatif à la complémentaire des frais de santé (transport sanitaire), art. Annexe II"
+    },
+    {
+      "cid": "KALIARTI000031985959",
+      "titre": "Transports routiers (IDCC 0016), Accord du 6 octobre 2015 relatif à la complémentaire des frais de santé (transport sanitaire), art. Annexe III"
+    },
+    {
+      "cid": "KALIARTI000044243420",
+      "titre": "Propreté (IDCC 3043), texte de base, 5.1.1. Priorités de formation"
+    },
+    {
+      "cid": "KALIARTI000044243485",
+      "titre": "Propreté (IDCC 3043), texte de base, 5.1.2. Dispositifs d'accès à la formation professionnelle et à la VAE pour les salariés"
+    },
+    {
+      "cid": "KALIARTI000044243582",
+      "titre": "Propreté (IDCC 3043), texte de base, 5.1.3. Contribution conventionnelle de branche pour le développement de la formation"
+    },
+    {
+      "cid": "KALIARTI000044243730",
+      "titre": "Propreté (IDCC 3043), texte de base, 5.2.1. Politique d'orientation des jeunes, des demandeurs d'emploi et des salariés en reconversion professionnelle vers les dispositifs de la branche"
+    },
+    {
+      "cid": "KALIARTI000044243751",
+      "titre": "Propreté (IDCC 3043), texte de base, 5.2.2. Développement de l'apprentissage"
+    },
+    {
+      "cid": "KALIARTI000044243765",
+      "titre": "Propreté (IDCC 3043), texte de base, 5.2.3. Contrat de professionnalisation pour les jeunes et les demandeurs d'emplois"
+    },
+    {
+      "cid": "KALIARTI000044243786",
+      "titre": "Propreté (IDCC 3043), texte de base, 5.3.1. Certifications délivrées par la branche propreté et services associés"
+    },
+    {
+      "cid": "KALIARTI000053049644",
+      "titre": "Services de l'automobile (IDCC 1090), Accord du 23 octobre 2025 relatif au tarif des cotisations de prévoyance obligatoire, art. 2"
+    },
+    {
+      "cid": "KALIARTI000054278292",
+      "titre": "Propreté (IDCC 3043), texte de base, 5.5.2. Développer la gestion prévisionnelle des emplois et des parcours professionnels"
+    },
+    {
+      "cid": "KALIARTI000054278393",
+      "titre": "Propreté (IDCC 3043), texte de base, 5.8.1. La collecte des fonds de la formation professionnelle et de l'apprentissage"
+    },
+    {
+      "cid": "LEGIARTI000006902760",
+      "titre": "Code du travail, art. L3142-89"
+    },
+    {
+      "cid": "LEGIARTI000006902770",
+      "titre": "Code du travail, art. L3142-97"
+    },
+    {
+      "cid": "LEGIARTI000006903696",
+      "titre": "Code du travail, art. L5212-15"
+    },
+    {
+      "cid": "LEGIARTI000006904226",
+      "titre": "Code du travail, art. L6323-4"
+    },
+    {
+      "cid": "LEGIARTI000018487030",
+      "titre": "Code du travail, art. R3163-5"
+    },
+    {
+      "cid": "LEGIARTI000018487338",
+      "titre": "Code du travail, art. R3252-6"
+    },
+    {
+      "cid": "LEGIARTI000018497232",
+      "titre": "Code du travail, art. R6222-24"
+    },
+    {
+      "cid": "LEGIARTI000033009722",
+      "titre": "Code du travail, art. L5151-9"
+    },
+    {
+      "cid": "LEGIARTI000033444548",
+      "titre": "Code du travail, art. R3121-29"
+    },
+    {
+      "cid": "LEGIARTI000033543487",
+      "titre": "Code du travail, art. R3121-8"
+    },
+    {
+      "cid": "LEGIARTI000038463824",
+      "titre": "Code du travail, art. D6113-27"
+    },
+    {
+      "cid": "LEGIARTI000047920053",
+      "titre": "Code du travail, art. L3142-94-2"
+    },
+    {
+      "cid": "LEGIARTI000047920057",
+      "titre": "Code du travail, art. L3142-94-3"
+    }
+  ]
+}
