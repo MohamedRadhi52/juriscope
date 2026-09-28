@@ -67,25 +67,55 @@ Les 62 rejets se répartissent ainsi : 39 extraits qui ne figurent pas mot pour 
 l'article, 19 questions qui recopient le texte, 3 paraphrases trop proches et 1 question mal formée. La
 génération a consommé 193 000 jetons en entrée et 79 000 en sortie, soit moins d'un dollar.
 
-## Premiers résultats
+## Résultats sur le jeu de développement
 
-Jeu pilote de 30 questions (`data/questions/pilote.jsonl`), BM25 sur les 24 399 articles,
-intervalles de confiance à 95 % par bootstrap, latence de la recherche seule par question :
+Les mesures portent sur les 148 questions du jeu de développement qui attendent au moins un
+article, avec des intervalles de confiance à 95 % par bootstrap. La latence est celle de la
+recherche seule (pour le dense, l'encodage de la question est calculé à l'avance) ; le coût
+est celui des appels à l'API.
 
-| Configuration | rappel@10 [IC95] | MRR@10 [IC95] | nDCG@10 [IC95] | p95 (ms) |
-|---|---|---|---|---:|
-| BM25 | 0.567 [0.400, 0.717] | 0.286 [0.161, 0.430] | 0.345 [0.219, 0.482] | 1.5 |
+| Configuration | rappel@10 [IC95] | MRR@10 [IC95] | nDCG@10 [IC95] | p95 (ms) | $ / 1 000 q |
+|---|---|---|---|---:|---:|
+| BM25 | 0.514 [0.439, 0.588] | 0.343 [0.279, 0.409] | 0.367 [0.308, 0.428] | 0.4 | 0.00 |
+| Dense (e5-small) | 0.574 [0.503, 0.649] | 0.406 [0.338, 0.478] | 0.430 [0.368, 0.497] | 27 | 0.00 |
+| Hybride RRF | 0.655 [0.588, 0.726] | 0.428 [0.366, 0.494] | 0.465 [0.406, 0.524] | 33 | 0.00 |
+| Hybride + reranker | 0.699 [0.635, 0.764] | 0.628 [0.560, 0.697] | 0.618 [0.555, 0.682] | 1890 | 5.84 |
 
-Ces chiffres donnent un ordre de grandeur, en attendant le jeu d'évaluation complet.
-Le premier diagnostic est déjà net. Sur les 11 questions ratées qui attendent un seul
-article, 9 ont en tête un article de convention qui reprend la règle du Code (la
-métallurgie surtout) : la vérité terrain ne retient que l'article du Code, et le jeu
-d'évaluation devra préciser la source attendue. Les autres échecs viennent du vocabulaire :
-"CSE" contre "comité social et économique", "mineur" contre "jeunes travailleurs", ce que
-la recherche dense devrait rattraper. Enfin, une question qui cite un numéro d'article
-remonte d'abord les articles qui citent ce numéro : une résolution directe des références
-est à prévoir.
+Rappel@10 par type de question :
+
+| Type | BM25 | Dense | Hybride | Hybride + reranker |
+|---|---:|---:|---:|---:|
+| Factuelle | 0.61 | 0.73 | 0.81 | 0.85 |
+| Multi-articles | 0.59 | 0.50 | 0.59 | 0.68 |
+| Convention contre Code | 0.35 | 0.26 | 0.35 | 0.35 |
+| Paraphrase éloignée | 0.11 | 0.16 | 0.21 | 0.26 |
+
+L'hybride bat chaque méthode seule : BM25 retrouve les termes exacts, le dense les
+reformulations, et leurs erreurs se recouvrent peu. Le reranker agit surtout sur le haut du
+classement : le MRR passe de 0,43 à 0,63, au prix de 1,9 s de latence au 95e centile et
+d'environ 6 $ pour 1 000 requêtes. Les paraphrases éloignées restent le point faible, avec un
+rappel@10 de 0,26 au mieux : c'est cet écart de vocabulaire que le fine-tuning des
+embeddings doit réduire. Pour les comparaisons entre une convention et le Code, le reranker
+retrouve l'article de convention dans 10 cas sur 17, mais l'article du Code dans
+2 seulement.
+
+La génération est mesurée sur l'échantillon d'annotation (80 questions, 16 par type) : les 5
+meilleurs articles de l'hybride reclassé sont fournis à Haiku 4.5, qui répond en les citant
+ou refuse.
+
+| Mesure | Valeur |
+|---|---:|
+| Refus corrects sur les questions hors corpus | 15 / 16 |
+| Refus à tort sur les questions qui ont une réponse | 11 / 64 |
+| Citations qui renvoient au contexte fourni | 98 % |
+| Article attendu parmi les citations | 58 % |
+| Latence p50 / p95 | 3.6 s / 6.0 s |
+| Coût pour 1 000 requêtes, reranker compris | 8.84 $ |
+
+Sur les 11 refus à tort, 7 viennent de la recherche : l'article attendu n'était pas parmi les
+5 articles fournis, et le modèle a eu raison de refuser. La justesse des réponses sera
+mesurée par un juge LLM, validé contre des étiquettes humaines.
 
 ```bash
-make eval   # recalcule la ligne BM25 et écrit results/pilote/bm25.json
+make eval   # recalcule la ligne BM25 sur le jeu de développement
 ```
