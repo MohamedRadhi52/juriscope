@@ -10,6 +10,7 @@ import json
 import numpy as np
 
 from juriscope.corpus import load_corpus, read_jsonl
+from juriscope.eval import bsard
 from juriscope.paths import DATA, SOURCES
 from juriscope.retrieve.dense import INDEX, MODEL, passages
 
@@ -26,13 +27,13 @@ def merge(prefix: str, shards: int) -> None:
     save(INDEX / f"{prefix}passages.npz", keys, np.concatenate([p["vectors"] for p in parts]))
 
 
-def encode(model_name: str, prefix: str, shard: int, shards: int) -> None:
+def encode(model_name: str, articles: list, questions: list, prefix: str, shard: int, shards: int):
     # torch n'est installé que dans les jobs qui encodent
     from sentence_transformers import SentenceTransformer
 
     model = SentenceTransformer(model_name)
     cids, texts = [], []
-    for article in load_corpus():
+    for article in articles:
         for passage in passages(article):
             cids.append(article["cid"])
             texts.append(f"passage: {passage}")
@@ -42,8 +43,6 @@ def encode(model_name: str, prefix: str, shard: int, shards: int) -> None:
     suffix = f"-{shard}" if shards > 1 else ""
     save(INDEX / f"{prefix}passages{suffix}.npz", cids[part], vectors)
     if shard == 0:
-        files = [DATA / "questions" / name for name in ("eval.jsonl", "pilote.jsonl")]
-        questions = sorted({q["question"] for f in files for q in read_jsonl(f)})
         vectors = model.encode([f"query: {q}" for q in questions], normalize_embeddings=True)
         save(INDEX / f"{prefix}questions.npz", questions, vectors)
     print(json.dumps({"passages": len(cids[part]), "modele": model_name, "morceau": shard}))
@@ -56,12 +55,19 @@ def main() -> None:
     parser.add_argument("--shard", type=int, default=0)
     parser.add_argument("--shards", type=int, default=1)
     parser.add_argument("--merge", action="store_true", help="réunit les morceaux calculés")
+    parser.add_argument("--corpus", choices=["juriscope", "bsard"], default="juriscope")
     args = parser.parse_args()
     prefix = f"{args.name}-" if args.name else ""
     if args.merge:
         merge(prefix, args.shards)
+        return
+    if args.corpus == "bsard":
+        articles, questions = bsard.load_articles(), [q["question"] for q in bsard.load_questions()]
     else:
-        encode(args.model, prefix, args.shard, args.shards)
+        files = [DATA / "questions" / name for name in ("eval.jsonl", "pilote.jsonl")]
+        articles = load_corpus()
+        questions = sorted({q["question"] for f in files for q in read_jsonl(f)})
+    encode(args.model, articles, questions, prefix, args.shard, args.shards)
 
 
 if __name__ == "__main__":

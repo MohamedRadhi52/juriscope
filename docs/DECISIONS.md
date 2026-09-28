@@ -273,3 +273,14 @@ Chaque article fournit deux questions. Si les deux tombent dans le même lot, l'
 l'une sert de négatif à l'autre alors qu'il est la bonne réponse. Avec 2 000 questions
 mélangées par lots de 32, le cas reste rare ; un échantillonneur qui évite les doublons de
 lot le supprimerait.
+
+## BSARD comme référence externe, sans entraînement dessus
+
+BSARD (Louis et Spanakis, 2022) mesure la recherche d'articles de loi belges, en français,
+sur 222 questions de test et 22 633 articles. Les modèles de Juriscope n'y sont jamais
+entraînés : le modèle affiné l'a été sur le droit du travail français, et BSARD mesure ce
+qui s'en transfère à un autre corps de textes. Le R@100 est la mesure de l'article original ;
+à titre de repère, son meilleur modèle, entraîné sur BSARD, atteint 74,8 %. Le jeu est
+téléchargé dans Actions depuis Hugging Face et n'est jamais redistribué : seules les mesures
+sont publiées. L'encodage suit le même découpage en morceaux parallèles, huit jobs pour les
+deux modèles.

@@ -1,0 +1,85 @@
+name: bsard
+
+# Référence externe BSARD : dès que le fine-tuning a publié le modèle affiné, encode le corpus
+# belge avec les deux modèles en huit jobs parallèles, puis mesure et commite les résultats.
+on:
+  workflow_run:
+    workflows: [finetune]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  encode:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      matrix:
+        model: [base, ft]
+        shard: [0, 1, 2, 3]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: requirements*.txt
+      - run: make install
+      - run: .venv/bin/pip install --quiet -r requirements-embed.txt
+      - run: .venv/bin/python -m juriscope.eval.bsard --download
+      - name: Modèle affiné
+        if: matrix.model == 'ft'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download embeddings -p e5-small-ft.zip --dir data/models
+          (cd data/models && unzip -q e5-small-ft.zip)
+      - run: >
+          .venv/bin/python -m juriscope.retrieve.embed --corpus bsard
+          --model ${{ matrix.model == 'ft' && 'data/models/e5-small-ft' || 'intfloat/multilingual-e5-small' }}
+          --name ${{ matrix.model == 'ft' && 'bsard-ft' || 'bsard' }}
+          --shard ${{ matrix.shard }} --shards 4
+      - uses: actions/upload-artifact@v7
+        with:
+          name: bsard-${{ matrix.model }}-${{ matrix.shard }}
+          path: data/index/bsard*.npz
+
+  evaluate:
+    needs: encode
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+          cache: pip
+      - run: make install
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: bsard-*
+          path: data/index
+          merge-multiple: true
+      - name: Mesures sur BSARD
+        shell: bash
+        run: |
+          .venv/bin/python -m juriscope.eval.bsard --download
+          .venv/bin/python -m juriscope.retrieve.embed --merge --name bsard --shards 4
+          .venv/bin/python -m juriscope.retrieve.embed --merge --name bsard-ft --shards 4
+          .venv/bin/python -m juriscope.eval.bsard 2>&1 | tee bsard.log
+          cat bsard.log >> "$GITHUB_STEP_SUMMARY"
+      # la dernière ligne du journal devient une annotation, lisible sans être connecté
+      - name: Erreur en annotation
+        if: failure() || cancelled()
+        run: echo "::error title=BSARD::$(tail -n 1 bsard.log)"
+      - name: Commit des résultats
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add results/bsard
+          git diff --cached --quiet || git commit -m "Référence externe BSARD : mesures sans et avec fine-tuning"
+          git pull --rebase
+          git push
