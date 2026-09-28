@@ -1,0 +1,41 @@
+{
+  "scenarios": 30,
+  "agent": 0.9666666666666667,
+  "rag": 0.6,
+  "par_type": {
+    "article": {
+      "scenarios": 5,
+      "agent": 5,
+      "rag": 5
+    },
+    "conventions": {
+      "scenarios": 5,
+      "agent": 5,
+      "rag": 1
+    },
+    "hors périmètre": {
+      "scenarios": 3,
+      "agent": 3,
+      "rag": 3
+    },
+    "plusieurs étapes": {
+      "scenarios": 6,
+      "agent": 6,
+      "rag": 2
+    },
+    "recherche": {
+      "scenarios": 8,
+      "agent": 7,
+      "rag": 7
+    },
+    "veille": {
+      "scenarios": 3,
+      "agent": 3,
+      "rag": 0
+    }
+  },
+  "erreurs_outils": 0,
+  "outils_par_question": 1.1666666666666667,
+  "latence_agent_p95_s": 7.42452356735001,
+  "cout_total": 0.404889
+}
