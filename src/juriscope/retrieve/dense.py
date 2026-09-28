@@ -59,11 +59,15 @@ class Dense:
             )
 
     @classmethod
-    def from_index(cls) -> Dense:
-        """Index des passages, avec les vecteurs des questions calculés à l'avance."""
-        questions, vectors = load_vectors(INDEX / "questions.npz")
+    def from_index(cls, name: str = "") -> Dense:
+        """Index des passages, avec les vecteurs des questions calculés à l'avance.
+
+        name choisit un jeu de vecteurs : "" pour le modèle de base, "ft" pour le modèle affiné.
+        """
+        prefix = f"{name}-" if name else ""
+        questions, vectors = load_vectors(INDEX / f"{prefix}questions.npz")
         lookup = dict(zip(questions, vectors, strict=True))
-        return cls(*load_vectors(INDEX / "passages.npz"), lookup.__getitem__)
+        return cls(*load_vectors(INDEX / f"{prefix}passages.npz"), lookup.__getitem__)
 
     def search(self, query: str, k: int = 10) -> list[str]:
         """Identifiants communs des k articles dont un passage est le plus proche."""

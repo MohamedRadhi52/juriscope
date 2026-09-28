@@ -238,3 +238,24 @@ atteint 0,6 sur les 64 questions de l'échantillon qui ont une réponse, soit un
 substantiel sur l'échelle de Landis et Koch. L'intervalle à 95 % vient de 2 000 tirages des
 paires d'étiquettes. Le kappa est aussi donné sur les seules réponses jugées par le modèle,
 pour ne pas le gonfler avec les refus jugés par règle.
+
+## Fine-tuning contrastif sur des paires hors du jeu d'évaluation
+
+Les paires d'entraînement viennent de 1 000 articles qu'aucune question du jeu d'évaluation
+n'utilise, ni comme positif ni comme négatif. Haiku 4.5 écrit deux questions par article,
+l'une avec les termes du texte, l'autre avec des mots courants : c'est l'écart de vocabulaire
+des paraphrases, le point faible mesuré, que l'entraînement doit réduire. Chaque question
+reçoit un négatif difficile tiré entre les rangs 10 et 50 de BM25 ; les tout premiers rangs
+contiennent souvent d'autres bonnes réponses. La boucle d'entraînement est écrite avec
+transformers en une trentaine de lignes : moyenne des états cachés comme e5, similarité
+cosinus multipliée par 20, entropie croisée où la bonne réponse de chaque question est son
+article et où tous les autres documents du lot servent de négatifs. Un seul passage sur les
+données, par lots de 32, taux d'apprentissage 2e-5. Le gain est mesuré sur le jeu de
+développement avec un intervalle apparié : les mêmes questions sont tirées pour les deux
+modèles, ce qui compare les méthodes sans mélanger les différences entre questions.
+
+## Encodage en quatre morceaux parallèles
+
+Le premier encodage des 34 049 passages a pris près d'une heure dans un seul job. Le workflow
+de fine-tuning le découpe en quatre jobs lancés en même temps, dont les vecteurs sont réunis
+avant publication ; le même découpage servira pour BSARD.

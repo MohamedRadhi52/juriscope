@@ -25,6 +25,9 @@ RETRIEVERS = {
     "dense": "Dense (e5-small)",
     "hybride": "Hybride RRF",
     "rerank": "Hybride + reranker",
+    "dense-ft": "Dense affiné",
+    "hybride-ft": "Hybride RRF, dense affiné",
+    "rerank-ft": "Hybride affiné + reranker",
 }
 RERANK_MODEL = "claude-haiku-4-5-20251001"
 METRICS = {"rappel@10": recall_at_k, "mrr@10": reciprocal_rank, "ndcg@10": ndcg_at_k}
@@ -36,13 +39,18 @@ HEADER = (
 
 
 def build(name: str, articles: list[dict]):
-    """Méthode de recherche à évaluer ; chaque méthode s'appuie sur les précédentes."""
-    if name == "bm25":
+    """Méthode de recherche à évaluer ; chaque méthode s'appuie sur les précédentes.
+
+    Le suffixe -ft remplace le modèle d'embeddings de base par le modèle affiné.
+    """
+    method, _, variant = name.partition("-")
+    if method == "bm25":
         return BM25(articles)
-    if name == "dense":
-        return Dense.from_index()
-    hybrid = Hybrid([BM25(articles), Dense.from_index()])
-    if name == "hybride":
+    dense = Dense.from_index(variant)
+    if method == "dense":
+        return dense
+    hybrid = Hybrid([BM25(articles), dense])
+    if method == "hybride":
         return hybrid
     return Rerank(hybrid, {a["cid"]: a for a in articles}, anthropic_complete, RERANK_MODEL)
 

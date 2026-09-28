@@ -1,0 +1,134 @@
+name: finetune
+
+# Affine le modèle d'embeddings, réencode les passages en quatre morceaux parallèles, publie
+# vecteurs et modèle en assets de release, puis mesure le gain sur le jeu de développement.
+on:
+  push:
+    branches: [main]
+    paths:
+      - src/juriscope/retrieve/finetune.py
+      - .github/workflows/finetune.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: requirements*.txt
+      - uses: actions/cache@v6
+        with:
+          path: data/raw
+          key: npm-${{ hashFiles('data/sources.json') }}
+      - run: make data
+      - run: .venv/bin/pip install --quiet -r requirements-embed.txt
+      - name: Paires, négatifs difficiles et entraînement
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: .venv/bin/python -m juriscope.retrieve.finetune
+      - uses: actions/upload-artifact@v7
+        with:
+          name: modele
+          path: data/models/e5-small-ft
+      - uses: actions/upload-artifact@v7
+        with:
+          name: entrainement
+          path: |
+            data/finetune/pairs.jsonl
+            results/finetune/entrainement.json
+
+  encode:
+    needs: train
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      matrix:
+        shard: [0, 1, 2, 3]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: requirements*.txt
+      - uses: actions/cache@v6
+        with:
+          path: data/raw
+          key: npm-${{ hashFiles('data/sources.json') }}
+      - run: make data
+      - run: .venv/bin/pip install --quiet -r requirements-embed.txt
+      - uses: actions/download-artifact@v8
+        with:
+          name: modele
+          path: data/models/e5-small-ft
+      - run: >
+          .venv/bin/python -m juriscope.retrieve.embed --model data/models/e5-small-ft
+          --name ft --shard ${{ matrix.shard }} --shards 4
+      - uses: actions/upload-artifact@v7
+        with:
+          name: vecteurs-${{ matrix.shard }}
+          path: data/index/ft-*.npz
+
+  publish:
+    needs: encode
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+          cache: pip
+      - uses: actions/cache@v6
+        with:
+          path: data/raw
+          key: npm-${{ hashFiles('data/sources.json') }}
+      - run: make data
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: vecteurs-*
+          path: data/index
+          merge-multiple: true
+      - uses: actions/download-artifact@v8
+        with:
+          name: entrainement
+      - uses: actions/download-artifact@v8
+        with:
+          name: modele
+          path: data/models/e5-small-ft
+      - name: Fusion et publication
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          .venv/bin/python -m juriscope.retrieve.embed --merge --name ft --shards 4
+          (cd data/models && zip -qr e5-small-ft.zip e5-small-ft)
+          gh release upload embeddings data/index/ft-passages.npz data/index/ft-questions.npz \
+            data/models/e5-small-ft.zip --clobber
+      - name: Gain sur le jeu de développement
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          for retriever in dense-ft hybride-ft rerank-ft; do
+            .venv/bin/python -m juriscope.eval.run_eval data/questions/eval.jsonl \
+              --split dev --retriever "$retriever"
+          done
+          for method in dense hybride rerank; do
+            .venv/bin/python -m juriscope.eval.compare results/eval-dev/$method.json \
+              results/eval-dev/$method-ft.json | tee -a "$GITHUB_STEP_SUMMARY"
+          done
+      - name: Commit des paires et des résultats
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/finetune results
+          git diff --cached --quiet || git commit -m "Fine-tuning des embeddings : paires, entraînement et gain mesuré"
+          git pull --rebase
+          git push

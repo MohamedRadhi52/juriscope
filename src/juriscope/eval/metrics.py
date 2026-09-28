@@ -27,3 +27,12 @@ def bootstrap_ci(
     samples = rng.choice(np.asarray(values, dtype=float), size=(n_resamples, len(values)))
     low, high = np.quantile(samples.mean(axis=1), [0.025, 0.975])
     return float(low), float(high)
+
+
+def paired_gain_ci(before: list[float], after: list[float], n_resamples: int = 2000, seed: int = 0):
+    """Gain moyen d'une méthode sur l'autre et son intervalle à 95 %, questions tirées ensemble."""
+    rng = np.random.default_rng(seed)
+    gains = np.asarray(after, dtype=float) - np.asarray(before, dtype=float)
+    samples = rng.choice(gains, size=(n_resamples, len(gains)))
+    low, high = np.quantile(samples.mean(axis=1), [0.025, 0.975])
+    return float(gains.mean()), float(low), float(high)
