@@ -1,0 +1,44 @@
+name: embed
+
+# Calcule les vecteurs des passages et des questions avec un modèle ouvert, puis les publie en
+# asset de la release "embeddings", que la recherche dense télécharge.
+on:
+  push:
+    branches: [main]
+    paths:
+      - src/juriscope/retrieve/embed.py
+      - src/juriscope/retrieve/dense.py
+      - requirements-embed.txt
+      - data/sources.json
+      - data/questions/eval.jsonl
+      - .github/workflows/embed.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  embed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: requirements*.txt
+      - uses: actions/cache@v6
+        with:
+          path: data/raw
+          key: npm-${{ hashFiles('data/sources.json') }}
+      - run: make data
+      - run: .venv/bin/pip install --quiet -r requirements-embed.txt
+      - run: .venv/bin/python -m juriscope.retrieve.embed
+      - name: Publication en asset de release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view embeddings > /dev/null 2>&1 || gh release create embeddings \
+            --title "Embeddings" --notes "Vecteurs recalculés par le workflow embed."
+          gh release upload embeddings data/index/passages.npz data/index/questions.npz --clobber

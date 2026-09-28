@@ -152,3 +152,27 @@ dont 39 extraits qui omettent des mots sans le signaler.
 Le jeu est séparé en développement (60 %) et test (40 %) dans chaque type, puis commité par
 le workflow `evalset`. Le générateur ne réécrit jamais une question déjà produite : relancer
 le workflow complète un jeu interrompu et ne change rien à un jeu complet.
+
+## Embeddings ouverts, calculés dans GitHub Actions
+
+La recherche dense utilise `intfloat/multilingual-e5-small`, un modèle ouvert de 118 millions
+de paramètres, plutôt qu'une API d'embeddings : pas de clé à gérer, des vecteurs
+reproductibles, et le même modèle que celui qui sera affiné, ce qui rend la comparaison
+entre modèle de base et modèle affiné directe. Le calcul tourne dans le workflow `embed`,
+qui publie les vecteurs en asset de release ; ils portent la version du corpus et sont
+refusés s'ils ne correspondent plus à `data/sources.json`. Les vecteurs des questions sont
+calculés en même temps : la latence mesurée pour la recherche dense exclut donc l'encodage
+de la question.
+
+## Passages de 250 mots, meilleur passage par article
+
+Le modèle lit au plus 512 jetons, alors que 5 % des articles dépassent 3 400 caractères.
+Chaque article est découpé en fenêtres de 250 mots qui se chevauchent de 50 mots, et chaque
+passage commence par le titre et la section de l'article. Un article est classé selon son
+meilleur passage.
+
+## Qdrant en mode local
+
+Les vecteurs sont chargés dans Qdrant en mode local, sans serveur : c'est le même client
+qu'en production, où il parlerait à un serveur Qdrant. Le mode local avertit au-delà de
+20 000 points ; il reste assez rapide pour évaluer environ 40 000 passages.
