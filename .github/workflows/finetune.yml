@@ -31,9 +31,14 @@ jobs:
       - run: make data
       - run: .venv/bin/pip install --quiet -r requirements-embed.txt
       - name: Paires, négatifs difficiles et entraînement
+        shell: bash
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: .venv/bin/python -m juriscope.retrieve.finetune
+        run: .venv/bin/python -m juriscope.retrieve.finetune 2>&1 | tee finetune.log
+      # la dernière ligne du journal devient une annotation, lisible sans être connecté
+      - name: Erreur en annotation
+        if: failure() || cancelled()
+        run: echo "::error title=Fine-tuning::$(tail -n 1 finetune.log)"
       - uses: actions/upload-artifact@v7
         with:
           name: modele
@@ -113,17 +118,25 @@ jobs:
           gh release upload embeddings data/index/ft-passages.npz data/index/ft-questions.npz \
             data/models/e5-small-ft.zip --clobber
       - name: Gain sur le jeu de développement
+        shell: bash
         env:
+          GH_TOKEN: ${{ github.token }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        # le reranker de base est recalculé dans le même run, pour une comparaison équitable
         run: |
-          for retriever in dense-ft hybride-ft rerank-ft; do
+          gh release download embeddings -p passages.npz -p questions.npz --dir data/index --clobber
+          for retriever in rerank dense-ft hybride-ft rerank-ft; do
             .venv/bin/python -m juriscope.eval.run_eval data/questions/eval.jsonl \
-              --split dev --retriever "$retriever"
+              --split dev --retriever "$retriever" 2>&1 | tee -a evaluation.log
           done
           for method in dense hybride rerank; do
             .venv/bin/python -m juriscope.eval.compare results/eval-dev/$method.json \
               results/eval-dev/$method-ft.json | tee -a "$GITHUB_STEP_SUMMARY"
           done
+      # la dernière ligne du journal devient une annotation, lisible sans être connecté
+      - name: Erreur en annotation
+        if: failure() || cancelled()
+        run: echo "::error title=Évaluation::$(tail -n 1 evaluation.log)"
       - name: Commit des paires et des résultats
         run: |
           git config user.name "github-actions[bot]"

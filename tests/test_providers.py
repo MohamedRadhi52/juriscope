@@ -124,3 +124,18 @@ def test_anthropic_text_is_taken_after_a_thinking_block(monkeypatch):
     monkeypatch.setenv("ANTHROPIC_API_KEY", "cle-de-test")
     monkeypatch.setattr(providers, "post_json", fake_post)
     assert providers.anthropic_complete("Q ?", "m")["output"] == "ok"
+
+
+def test_retry_waits_as_long_as_the_api_asks(monkeypatch):
+    waits, calls = [], []
+
+    def fake_urlopen(request, timeout):
+        calls.append(request)
+        if len(calls) == 1:
+            raise HTTPError(request.full_url, 429, "Too Many Requests", {"retry-after": "7"}, None)
+        return io.BytesIO(json.dumps(RESPONSE).encode())
+
+    monkeypatch.setattr(providers, "urlopen", fake_urlopen)
+    monkeypatch.setattr(providers.time, "sleep", waits.append)
+    providers.post_json("https://example.org", {}, {})
+    assert waits == [7.0]

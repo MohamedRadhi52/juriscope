@@ -44,7 +44,8 @@ def post_json(url: str, payload: dict, headers: dict, attempts: int = 8) -> dict
             if not retryable or attempt == attempts - 1:
                 detail = error.read().decode(errors="replace")[:500]
                 raise RuntimeError(f"{url} a répondu {error.code} : {detail}") from error
-            time.sleep(2**attempt)
+            # l'API indique parfois combien de secondes attendre avant de réessayer
+            time.sleep(max(2**attempt, float(error.headers.get("retry-after") or 0)))
 
 
 def anthropic_complete(prompt: str, model: str, temperature: float = 0.7) -> dict:

@@ -1,17 +1,16 @@
 name: embed
 
 # Calcule les vecteurs des passages et des questions avec un modèle ouvert, puis les publie en
-# asset de la release "embeddings", que la recherche dense télécharge.
+# asset de la release "embeddings", que la recherche dense télécharge. Il ne se relance seul
+# que si les vecteurs changent (corpus, questions, dépendances) ; après une modification du
+# découpage en passages, le lancer à la main (gh workflow run embed.yml).
 on:
   push:
     branches: [main]
     paths:
-      - src/juriscope/retrieve/embed.py
-      - src/juriscope/retrieve/dense.py
       - requirements-embed.txt
       - data/sources.json
       - data/questions/eval.jsonl
-      - .github/workflows/embed.yml
   workflow_dispatch:
 
 permissions:

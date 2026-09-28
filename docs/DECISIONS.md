@@ -259,3 +259,17 @@ modèles, ce qui compare les méthodes sans mélanger les différences entre que
 Le premier encodage des 34 049 passages a pris près d'une heure dans un seul job. Le workflow
 de fine-tuning le découpe en quatre jobs lancés en même temps, dont les vecteurs sont réunis
 avant publication ; le même découpage servira pour BSARD.
+
+## Reranker à température nulle
+
+Deux évaluations successives du reranker, à la température par défaut, ont donné des
+classements différents. Il tourne désormais à température nulle, pour que la même question
+donne le même classement, et le reranker de base est recalculé dans le même run que sa
+variante affinée avant toute comparaison.
+
+## Limite connue du fine-tuning : faux négatifs dans un lot
+
+Chaque article fournit deux questions. Si les deux tombent dans le même lot, l'article de
+l'une sert de négatif à l'autre alors qu'il est la bonne réponse. Avec 2 000 questions
+mélangées par lots de 32, le cas reste rare ; un échantillonneur qui évite les doublons de
+lot le supprimerait.

@@ -55,13 +55,17 @@ def write_questions(article: dict, complete: Callable = anthropic_complete) -> l
 
 def generate_pairs(articles: list[dict], write: Callable = write_questions) -> list[dict]:
     """Paires question-article ; trois requêtes à la fois, sous la limite de débit de l'API."""
+    pairs = []
     with ThreadPoolExecutor(max_workers=3) as pool:
-        questions = list(pool.map(write, articles))
-    return [
-        {"cid": article["cid"], "question": question}
-        for article, found in zip(articles, questions, strict=True)
-        for question in found
-    ]
+        for done, (article, found) in enumerate(
+            zip(articles, pool.map(write, articles), strict=True), 1
+        ):
+            pairs += [{"cid": article["cid"], "question": question} for question in found]
+            if done % 100 == 0:
+                print(
+                    f"paires : {done}/{len(articles)} articles, {len(pairs)} questions", flush=True
+                )
+    return pairs
 
 
 def mine_negatives(pairs: list[dict], search: Callable, excluded: set, seed: int) -> list[dict]:

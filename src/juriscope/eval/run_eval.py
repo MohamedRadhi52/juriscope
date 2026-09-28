@@ -5,6 +5,7 @@ results/<jeu>/<méthode>.json, puis affiche la ligne du tableau d'ablation.
 """
 
 import argparse
+import functools
 import json
 import time
 from pathlib import Path
@@ -52,7 +53,9 @@ def build(name: str, articles: list[dict]):
     hybrid = Hybrid([BM25(articles), dense])
     if method == "hybride":
         return hybrid
-    return Rerank(hybrid, {a["cid"]: a for a in articles}, anthropic_complete, RERANK_MODEL)
+    # température nulle : deux évaluations du reranker donnent le même classement
+    complete = functools.partial(anthropic_complete, temperature=0)
+    return Rerank(hybrid, {a["cid"]: a for a in articles}, complete, RERANK_MODEL)
 
 
 def evaluate(retriever, questions: list[dict]) -> dict:

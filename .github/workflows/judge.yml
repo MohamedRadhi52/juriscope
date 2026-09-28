@@ -34,13 +34,19 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: gh release download embeddings --dir data/index --clobber
       - name: Réponses du jeu de développement
+        shell: bash
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: .venv/bin/python -m juriscope.generate.run_generation --dev
+        run: .venv/bin/python -m juriscope.generate.run_generation --dev 2>&1 | tee api.log
       - name: Juge et accord avec les étiquettes humaines
+        shell: bash
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: .venv/bin/python -m juriscope.eval.judge | tee -a "$GITHUB_STEP_SUMMARY"
+        run: .venv/bin/python -m juriscope.eval.judge 2>&1 | tee api.log
+      # la dernière ligne du journal devient une annotation, lisible sans être connecté
+      - name: Erreur en annotation
+        if: failure() || cancelled()
+        run: echo "::error title=Juge::$(tail -n 1 api.log)"
       - name: Commit des résultats
         if: ${{ !cancelled() }}
         run: |

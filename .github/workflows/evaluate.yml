@@ -32,15 +32,20 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: gh release download embeddings --dir data/index --clobber
       - name: Évaluation sur le jeu de développement
+        shell: bash
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
           for retriever in bm25 dense hybride rerank; do
             .venv/bin/python -m juriscope.eval.run_eval data/questions/eval.jsonl \
-              --split dev --retriever "$retriever" | tee -a evaluation.log
+              --split dev --retriever "$retriever" 2>&1 | tee -a evaluation.log
           done
           grep -m 2 '^|' evaluation.log >> "$GITHUB_STEP_SUMMARY"
           grep '^| [BDH]' evaluation.log >> "$GITHUB_STEP_SUMMARY"
+      # la dernière ligne du journal devient une annotation, lisible sans être connecté
+      - name: Erreur en annotation
+        if: failure() || cancelled()
+        run: echo "::error title=Évaluation::$(tail -n 1 evaluation.log)"
       - name: Commit des résultats
         run: |
           git config user.name "github-actions[bot]"

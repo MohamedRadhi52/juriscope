@@ -33,9 +33,14 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: gh release download embeddings --dir data/index --clobber
       - name: Génération citée
+        shell: bash
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: .venv/bin/python -m juriscope.generate.run_generation | tee -a "$GITHUB_STEP_SUMMARY"
+        run: .venv/bin/python -m juriscope.generate.run_generation 2>&1 | tee api.log
+      # la dernière ligne du journal devient une annotation, lisible sans être connecté
+      - name: Erreur en annotation
+        if: failure() || cancelled()
+        run: echo "::error title=Génération::$(tail -n 1 api.log)"
       - name: Commit des réponses
         if: ${{ !cancelled() }}
         run: |
