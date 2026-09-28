@@ -306,3 +306,29 @@ chaque article du Code modifié donne une question temporelle sur sa rédaction 
 Le workflow `veille` fait cette comparaison chaque lundi entre le corpus épinglé et les
 dernières versions publiées ; le workflow `keepalive` l'empêche d'être désactivé. Une réponse
 qui cite un article modifié depuis la version précédente le signale.
+
+## Agent : une boucle de décision à quatre outils
+
+L'agent est un graphe LangGraph de deux sortes de nœuds : un nœud de décision, où Haiku 4.5
+choisit l'outil suivant d'après la question et les résultats déjà obtenus, et un nœud par
+outil. Quatre outils : la recherche citée (hybride affiné et reranker), la lecture d'un
+article par son numéro, qui corrige le point faible de BM25 sur les références explicites,
+une requête SQL sur les métadonnées des conventions, et le rapport de veille. Au plus quatre
+outils par question ; les articles cités sont ceux que les outils ont renvoyés, jamais des
+numéros écrits par le modèle. Ses sous-questions sont encodées à la volée par le modèle
+affiné, puisqu'elles n'ont pas de vecteur calculé d'avance.
+
+## SQL en lecture seule
+
+La requête SQL vient du modèle : seule une instruction SELECT est acceptée, la base SQLite
+est ouverte en lecture seule et 50 lignes au plus sont renvoyées. Une erreur de requête est
+rendue à l'agent, qui peut la corriger, et comptée dans les résultats.
+
+## Évaluation de l'agent sur des critères vérifiables
+
+Trente scénarios : 5 lectures d'article, 5 questions sur les conventions, 3 sur la veille,
+3 hors périmètre, 8 recherches simples et 6 questions à plusieurs étapes. Un scénario réussit
+si la réponse contient les valeurs attendues, cite les articles attendus et refuse quand il
+le faut ; pour l'agent, les outils attendus doivent aussi avoir servi. Le RAG simple passe
+les mêmes scénarios, sans le critère des outils. Le juge LLM n'ayant pas été retenu, aucun
+critère ne dépend de lui.

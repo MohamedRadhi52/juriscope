@@ -1,0 +1,30 @@
+{"id": "a1", "type": "article", "question": "Que dit l'article L1234-1 du Code du travail ?", "outils": ["article"], "contient": [], "cite": ["LEGIARTI000006901112"], "refus": false}
+{"id": "a2", "type": "article", "question": "Quel est le texte de l'article L3121-27 ?", "outils": ["article"], "contient": [], "cite": ["LEGIARTI000006902466"], "refus": false}
+{"id": "a3", "type": "article", "question": "Montre-moi l'article R1234-2 du Code du travail.", "outils": ["article"], "contient": [], "cite": ["LEGIARTI000018483190"], "refus": false}
+{"id": "a4", "type": "article", "question": "Que prévoit l'article L. 1152-1 ?", "outils": ["article"], "contient": [], "cite": ["LEGIARTI000006900818"], "refus": false}
+{"id": "a5", "type": "article", "question": "Que contient l'article L3141-3 du Code du travail ?", "outils": ["article"], "contient": [], "cite": ["LEGIARTI000006902640"], "refus": false}
+{"id": "c1", "type": "conventions", "question": "Quelle convention collective du corpus couvre le plus de salariés ?", "outils": ["conventions"], "contient": ["syntec"], "cite": [], "refus": false}
+{"id": "c2", "type": "conventions", "question": "Combien de salariés couvre la convention collective de la banque ?", "outils": ["conventions"], "contient": ["216431"], "cite": [], "refus": false}
+{"id": "c3", "type": "conventions", "question": "Quelles conventions couvrent plus de 600 000 salariés ?", "outils": ["conventions"], "contient": ["syntec", "metallurgie", "alimentaire", "transports"], "cite": [], "refus": false}
+{"id": "c4", "type": "conventions", "question": "Combien d'articles de la convention Syntec contient le corpus ?", "outils": ["conventions"], "contient": ["971"], "cite": [], "refus": false}
+{"id": "c5", "type": "conventions", "question": "Quel est l'IDCC de la convention des hôtels, cafés, restaurants ?", "outils": ["conventions"], "contient": ["1979"], "cite": [], "refus": false}
+{"id": "v1", "type": "veille", "question": "Combien d'articles ont été modifiés depuis la version précédente du corpus ?", "outils": ["veille"], "contient": ["30"], "cite": [], "refus": false}
+{"id": "v2", "type": "veille", "question": "Combien d'articles ont été supprimés entre les deux dernières versions du corpus ?", "outils": ["veille"], "contient": ["40"], "cite": [], "refus": false}
+{"id": "v3", "type": "veille", "question": "Combien d'articles ont été ajoutés depuis la version précédente du corpus ?", "outils": ["veille"], "contient": ["112"], "cite": [], "refus": false}
+{"id": "h1", "type": "hors périmètre", "question": "Comment remplir ma déclaration d'impôts sur le revenu ?", "outils": [], "contient": [], "cite": [], "refus": true}
+{"id": "h2", "type": "hors périmètre", "question": "Quelle sera la météo à Toulouse demain ?", "outils": [], "contient": [], "cite": [], "refus": true}
+{"id": "h3", "type": "hors périmètre", "question": "Quel est le montant de la pension de retraite d'un fonctionnaire ?", "outils": [], "contient": [], "cite": [], "refus": true}
+{"id": "r1", "type": "recherche", "question": "Combien d'heures par semaine correspond un temps plein selon la loi ?", "outils": ["recherche"], "contient": [], "cite": ["LEGIARTI000006902466"], "refus": false}
+{"id": "r2", "type": "recherche", "question": "Combien de jours de congés payés gagne-t-on chaque mois ?", "outils": ["recherche"], "contient": [], "cite": ["LEGIARTI000006902640"], "refus": false}
+{"id": "r3", "type": "recherche", "question": "Quelle est la durée maximale de la période d'essai pour un cadre en CDI ?", "outils": ["recherche"], "contient": [], "cite": ["LEGIARTI000019067614"], "refus": false}
+{"id": "r4", "type": "recherche", "question": "Qu'est-ce qui caractérise le harcèlement moral au travail ?", "outils": ["recherche"], "contient": [], "cite": ["LEGIARTI000006900818"], "refus": false}
+{"id": "r5", "type": "recherche", "question": "Combien de semaines dure le congé de maternité ?", "outils": ["recherche"], "contient": [], "cite": ["LEGIARTI000006900897"], "refus": false}
+{"id": "r6", "type": "recherche", "question": "Quelle prime touche un salarié à la fin de son CDD ?", "outils": ["recherche"], "contient": [], "cite": ["LEGIARTI000006901219"], "refus": false}
+{"id": "r7", "type": "recherche", "question": "Combien de jours de congé a-t-on pour son mariage ?", "outils": ["recherche"], "contient": [], "cite": ["LEGIARTI000006902672"], "refus": false}
+{"id": "r8", "type": "recherche", "question": "Dans la convention Syntec, quelle est la durée du préavis ?", "outils": ["recherche"], "contient": [], "cite": ["KALIARTI000044253070"], "refus": false}
+{"id": "m1", "type": "plusieurs étapes", "question": "Quelle convention couvre le plus de salariés, et que prévoit-elle sur la période d'essai ?", "outils": ["conventions", "recherche"], "contient": [], "cite": ["KALIARTI000044253063"], "refus": false}
+{"id": "m2", "type": "plusieurs étapes", "question": "Quel est l'IDCC de la convention de la banque, et quels délais de préavis prévoit-elle ?", "outils": ["conventions", "recherche"], "contient": ["2120"], "cite": ["KALIARTI000005784453"], "refus": false}
+{"id": "m3", "type": "plusieurs étapes", "question": "Combien de salariés couvre la convention HCR, et que dit l'article L3121-27 ?", "outils": ["conventions", "article"], "contient": ["580085"], "cite": ["LEGIARTI000006902466"], "refus": false}
+{"id": "m4", "type": "plusieurs étapes", "question": "Combien d'articles ont été supprimés depuis la version précédente, et que prévoit l'article L1234-1 ?", "outils": ["veille", "article"], "contient": ["40"], "cite": ["LEGIARTI000006901112"], "refus": false}
+{"id": "m5", "type": "plusieurs étapes", "question": "L'article L3142-89 fait-il partie des articles modifiés récemment, et que dit-il ?", "outils": ["veille", "article"], "contient": [], "cite": ["LEGIARTI000006902760"], "refus": false}
+{"id": "m6", "type": "plusieurs étapes", "question": "Parmi les conventions de plus de 700 000 salariés, laquelle compte le moins d'articles dans le corpus, et que dit-elle de la période d'essai ?", "outils": ["conventions", "recherche"], "contient": [], "cite": ["KALIARTI000044253063"], "refus": false}

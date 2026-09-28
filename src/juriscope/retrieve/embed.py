@@ -27,6 +27,14 @@ def merge(prefix: str, shards: int) -> None:
     save(INDEX / f"{prefix}passages.npz", keys, np.concatenate([p["vectors"] for p in parts]))
 
 
+def live_encoder(model_name: str):
+    """Encode chaque question à la demande, pour les questions sans vecteur calculé d'avance."""
+    from sentence_transformers import SentenceTransformer
+
+    model = SentenceTransformer(model_name)
+    return lambda query: model.encode(f"query: {query}", normalize_embeddings=True)
+
+
 def encode(model_name: str, articles: list, questions: list, prefix: str, shard: int, shards: int):
     # torch n'est installé que dans les jobs qui encodent
     from sentence_transformers import SentenceTransformer
