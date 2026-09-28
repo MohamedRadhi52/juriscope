@@ -4,7 +4,6 @@ Le juge suit la grille donnée aux annotateurs (docs/eval_guidelines.md). Un ref
 sans modèle : il est correct pour une question hors corpus et faux sinon.
 """
 
-import functools
 import json
 from pathlib import Path
 
@@ -106,7 +105,8 @@ def agreement(judged: list[dict], labels: dict) -> dict:
 def main() -> None:
     articles = {a["cid"]: a for a in load_corpus()}
     questions = {q["id"]: q for q in read_jsonl(EVAL)}
-    complete = functools.partial(anthropic_complete, temperature=0)
+    # Sonnet 5.5 refuse le réglage de température : le juge garde celui du modèle
+    complete = anthropic_complete
     labels = {row["id"]: row["answer_ok"] for row in read_jsonl(VALIDATION)}
 
     sample = judge_file(OUTPUT / "answers.jsonl", questions, articles, complete)

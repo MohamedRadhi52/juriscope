@@ -230,8 +230,9 @@ modèle.
 
 ## Juge LLM validé avant usage, seuil fixé d'avance
 
-Le juge est un autre modèle que le générateur (Sonnet 5.5 contre Haiku 4.5), à température
-nulle, et il applique la grille donnée aux annotateurs : une réponse réussit si elle est
+Le juge est un autre modèle que le générateur (Sonnet 5.5 contre Haiku 4.5), avec le réglage
+de température du modèle, que Sonnet 5.5 ne permet plus de changer ; deux passages du juge
+peuvent donc différer légèrement. Il applique la grille donnée aux annotateurs : une réponse réussit si elle est
 fidèle aux articles cités et juste. Les refus se jugent par règle, sans modèle. Seuil fixé
 avant tout calcul : le juge est retenu si son kappa de Cohen avec les étiquettes humaines
 atteint 0,6 sur les 64 questions de l'échantillon qui ont une réponse, soit un accord

@@ -48,13 +48,15 @@ def post_json(url: str, payload: dict, headers: dict, attempts: int = 8) -> dict
             time.sleep(max(2**attempt, float(error.headers.get("retry-after") or 0)))
 
 
-def anthropic_complete(prompt: str, model: str, temperature: float = 0.7) -> dict:
+def anthropic_complete(prompt: str, model: str, temperature: float | None = None) -> dict:
+    """La température n'est envoyée que si elle est donnée : certains modèles la refusent."""
     payload = {
         "model": model,
         "max_tokens": 1024,
-        "temperature": temperature,
         "messages": [{"role": "user", "content": prompt}],
     }
+    if temperature is not None:
+        payload["temperature"] = temperature
     headers = {
         "x-api-key": os.environ["ANTHROPIC_API_KEY"],
         "anthropic-version": "2023-06-01",

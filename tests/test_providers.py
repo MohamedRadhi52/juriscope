@@ -139,3 +139,19 @@ def test_retry_waits_as_long_as_the_api_asks(monkeypatch):
     monkeypatch.setattr(providers.time, "sleep", waits.append)
     providers.post_json("https://example.org", {}, {})
     assert waits == [7.0]
+
+
+def test_temperature_is_sent_only_when_given(monkeypatch):
+    sent = []
+
+    def fake_post(url, payload, headers):
+        sent.append(payload)
+        blocks = [{"type": "text", "text": "ok"}]
+        return {"model": "m", "content": blocks, "usage": {"input_tokens": 1, "output_tokens": 1}}
+
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "cle-de-test")
+    monkeypatch.setattr(providers, "post_json", fake_post)
+    providers.anthropic_complete("Q ?", "m")
+    providers.anthropic_complete("Q ?", "m", temperature=0)
+    assert "temperature" not in sent[0]
+    assert sent[1]["temperature"] == 0
