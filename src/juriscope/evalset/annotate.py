@@ -1,7 +1,9 @@
 """Validation manuelle d'un échantillon du jeu d'évaluation, dans le terminal.
 
-Chaque avis est enregistré aussitôt dans data/questions/validation.jsonl : on peut quitter
-avec q et reprendre plus tard. Consignes : docs/eval_guidelines.md.
+Pour chaque question : clarté, réponse attendue, puis, si elle existe, réponse du système,
+montrée en dernier pour ne pas influencer les deux premiers avis. Chaque fiche est
+enregistrée aussitôt dans data/questions/validation.jsonl : on peut quitter avec q et
+reprendre plus tard. Consignes : docs/eval_guidelines.md.
 """
 
 import argparse
@@ -13,9 +15,10 @@ from collections import defaultdict
 
 from juriscope.corpus import load_corpus, read_jsonl
 from juriscope.evalset.verify import EVAL
-from juriscope.paths import DATA
+from juriscope.paths import DATA, ROOT
 
 VALIDATION = DATA / "questions" / "validation.jsonl"
+ANSWERS = ROOT / "results" / "generation" / "answers.jsonl"
 SEED = 2026
 
 
@@ -54,12 +57,22 @@ def show(question: dict, position: int, total: int, articles: dict) -> None:
         print("\n".join(textwrap.fill(line, width=100) for line in text.splitlines()))
 
 
+def show_answer(row: dict, articles: dict) -> None:
+    if row["refus"]:
+        print("\nRéponse du système : refus")
+        return
+    print(f"\nRéponse du système : {textwrap.fill(row['reponse'], width=100)}")
+    for cid in row["citations"]:
+        print(f"  cite : {articles[cid]['title']}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(prog="python -m juriscope.evalset.annotate")
     parser.add_argument("-n", type=int, default=80, help="taille de l'échantillon")
     args = parser.parse_args()
 
     articles = {a["cid"]: a for a in load_corpus()}
+    answers = {row["id"]: row for row in read_jsonl(ANSWERS)} if ANSWERS.exists() else {}
     done = {row["id"] for row in read_jsonl(VALIDATION)} if VALIDATION.exists() else set()
     todo = [q for q in sample(read_jsonl(EVAL), args.n, SEED) if q["id"] not in done]
     for position, question in enumerate(todo, len(done) + 1):
@@ -74,8 +87,14 @@ def main() -> None:
         expected = ask(prompt)
         if expected == "q":
             break
-        comment = input("Commentaire (Entrée pour passer) : ").strip()
         row = {"id": question["id"], "clear": clear == "o", "expected_ok": expected == "o"}
+        if question["id"] in answers:
+            show_answer(answers[question["id"]], articles)
+            system = ask("Réponse du système correcte et fidèle aux articles cités ? [o/n, q] ")
+            if system == "q":
+                break
+            row["answer_ok"] = system == "o"
+        comment = input("Commentaire (Entrée pour passer) : ").strip()
         with VALIDATION.open("a", encoding="utf-8") as f:
             f.write(json.dumps(row | {"comment": comment}, ensure_ascii=False) + "\n")
 

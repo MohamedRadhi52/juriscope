@@ -96,3 +96,21 @@ def test_json_is_found_around_text_and_code_fences():
 def test_cost_uses_the_public_prices():
     usages = [{"input_tokens": 600_000, "output_tokens": 100_000}] * 2
     assert providers.cost(usages, "claude-haiku-4-5-20251001") == 2.2
+
+
+def test_azure_openai_uses_the_deployment_url_and_api_key(monkeypatch):
+    sent = {}
+
+    def fake_post(url, payload, headers):
+        sent.update(url=url, headers=headers)
+        return RESPONSE
+
+    monkeypatch.setenv("AZURE_OPENAI_ENDPOINT", "https://ressource.openai.azure.com/")
+    monkeypatch.setenv("AZURE_OPENAI_API_KEY", "cle-de-test")
+    monkeypatch.setattr(providers, "post_json", fake_post)
+    answer = providers.azure_openai_complete("Écris une question.", "mon-deploiement")
+    assert sent["url"].startswith(
+        "https://ressource.openai.azure.com/openai/deployments/mon-deploiement/chat/completions"
+    )
+    assert sent["headers"]["api-key"] == "cle-de-test"
+    assert answer["usage"] == {"input_tokens": 10, "output_tokens": 5}
