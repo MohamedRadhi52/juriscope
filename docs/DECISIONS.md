@@ -285,3 +285,14 @@ qui s'en transfère à un autre corps de textes. Le R@100 est la mesure de l'art
 téléchargé dans Actions depuis Hugging Face et n'est jamais redistribué : seules les mesures
 sont publiées. L'encodage suit le même découpage en morceaux parallèles, huit jobs pour les
 deux modèles.
+
+## Juge non retenu, sans réajustement sur les mêmes étiquettes
+
+Le kappa du juge sur les 64 questions qui ont une réponse vaut 0,46 [0,26 ; 0,66], sous le
+seuil de 0,6 fixé d'avance : le juge n'est pas retenu. Il est trop indulgent, 14 des 17
+désaccords étant des réponses qu'il accepte et que l'annotation refuse, dont 5 comparaisons
+entre une convention et le Code. Le réajuster sur ces mêmes étiquettes puis le remesurer
+gonflerait son kappa ; il faudrait de nouvelles étiquettes. La qualité de la génération est
+donc mesurée par l'annotation humaine, et la CI contrôlera la génération avec des critères
+vérifiables : citations présentes dans le contexte, refus des questions hors corpus, article
+attendu parmi les citations.

@@ -42,11 +42,11 @@ certaines annexes. 228 articles vides sont écartés, et 1 750 articles ont un t
 ## Jeu d'évaluation
 
 Les questions sont générées par un modèle de l'API Anthropic (Haiku 4.5) à partir d'articles
-tirés au hasard, par partie du Code et par convention. L'article source sert de vérité terrain, ce qui dispense d'annoter
-pour mesurer la recherche. Six types sont couverts : questions factuelles, paraphrases sans
-les mots du texte, questions sur deux articles voisins, comparaisons entre une convention et
-le Code, et questions hors corpus tirées du Code de la sécurité sociale, pour lesquelles on
-attend un refus.
+tirés au hasard, par partie du Code et par convention. L'article source sert de vérité
+terrain, ce qui dispense d'annoter pour mesurer la recherche. Six types sont couverts :
+questions factuelles, paraphrases sans les mots du texte, questions sur deux articles
+voisins, comparaisons entre une convention et le Code, et questions hors corpus tirées du
+Code de la sécurité sociale, pour lesquelles on attend un refus.
 
 Chaque question passe des vérifications automatiques : l'extrait cité doit figurer mot pour
 mot dans l'article, la question ne doit pas recopier le texte, et une paraphrase doit s'en
@@ -64,8 +64,9 @@ questions est relu à la main selon [docs/eval_guidelines.md](docs/eval_guidelin
 | Total | 338 | 276 | 165 | 111 |
 
 Les 62 rejets se répartissent ainsi : 39 extraits qui ne figurent pas mot pour mot dans
-l'article, 19 questions qui recopient le texte, 3 paraphrases trop proches et 1 question mal formée. La
-génération a consommé 193 000 jetons en entrée et 79 000 en sortie, soit moins d'un dollar.
+l'article, 19 questions qui recopient le texte, 3 paraphrases trop proches et 1 question mal
+formée. La génération a consommé 193 000 jetons en entrée et 79 000 en sortie, soit moins
+d'un dollar.
 
 La relecture de l'échantillon (80 questions, 16 par type) donne 65 questions claires et 71
 réponses attendues correctes. Les paraphrases sont les plus fragiles : 10 sur 16 dans les
@@ -80,45 +81,78 @@ est celui des appels à l'API.
 
 | Configuration | rappel@10 [IC95] | MRR@10 [IC95] | nDCG@10 [IC95] | p95 (ms) | $ / 1 000 q |
 |---|---|---|---|---:|---:|
-| BM25 | 0.514 [0.439, 0.588] | 0.343 [0.279, 0.409] | 0.367 [0.308, 0.428] | 0.4 | 0.00 |
-| Dense (e5-small) | 0.574 [0.503, 0.649] | 0.406 [0.338, 0.478] | 0.430 [0.368, 0.497] | 27 | 0.00 |
-| Hybride RRF | 0.655 [0.588, 0.726] | 0.428 [0.366, 0.494] | 0.465 [0.406, 0.524] | 33 | 0.00 |
-| Hybride + reranker | 0.699 [0.635, 0.764] | 0.628 [0.560, 0.697] | 0.618 [0.555, 0.682] | 1890 | 5.84 |
+| BM25 | 0.514 [0.439, 0.588] | 0.343 [0.280, 0.409] | 0.367 [0.308, 0.428] | 0.4 | 0.00 |
+| Dense (e5-small) | 0.574 [0.503, 0.649] | 0.406 [0.338, 0.478] | 0.430 [0.368, 0.497] | 31 | 0.00 |
+| Hybride RRF | 0.655 [0.588, 0.726] | 0.428 [0.366, 0.494] | 0.465 [0.406, 0.524] | 44 | 0.00 |
+| Hybride + reranker | 0.699 [0.635, 0.764] | 0.629 [0.560, 0.698] | 0.618 [0.555, 0.683] | 2711 | 5.84 |
+| Dense affiné | 0.635 [0.561, 0.709] | 0.512 [0.444, 0.584] | 0.522 [0.455, 0.589] | 46 | 0.00 |
+| Hybride RRF, dense affiné | 0.703 [0.635, 0.767] | 0.478 [0.412, 0.541] | 0.513 [0.451, 0.572] | 50 | 0.00 |
+| Hybride affiné + reranker | 0.760 [0.696, 0.818] | 0.671 [0.600, 0.739] | 0.664 [0.600, 0.727] | 2037 | 5.76 |
+
+Gain du fine-tuning, mesuré en apparié (les mêmes questions sont tirées pour les deux modèles) :
+
+| Chaîne | rappel@10 | MRR@10 | nDCG@10 |
+|---|---|---|---|
+| Dense | +0.061 [-0.007, +0.125] | +0.106 [+0.045, +0.167] | +0.092 [+0.037, +0.147] |
+| Hybride | +0.047 [+0.007, +0.091] | +0.050 [+0.012, +0.085] | +0.048 [+0.018, +0.076] |
+| Hybride + reranker | +0.061 [+0.010, +0.115] | +0.042 [-0.006, +0.095] | +0.046 [+0.001, +0.095] |
 
 Rappel@10 par type de question :
 
-| Type | BM25 | Dense | Hybride | Hybride + reranker |
-|---|---:|---:|---:|---:|
-| Factuelle | 0.61 | 0.73 | 0.81 | 0.85 |
-| Multi-articles | 0.59 | 0.50 | 0.59 | 0.68 |
-| Convention contre Code | 0.35 | 0.26 | 0.35 | 0.35 |
-| Paraphrase éloignée | 0.11 | 0.16 | 0.21 | 0.26 |
+| Type | BM25 | Dense | Hybride + reranker | Dense affiné | Hybride affiné + reranker |
+|---|---:|---:|---:|---:|---:|
+| Factuelle | 0.61 | 0.73 | 0.85 | 0.75 | 0.87 |
+| Multi-articles | 0.59 | 0.50 | 0.68 | 0.62 | 0.74 |
+| Convention contre Code | 0.35 | 0.26 | 0.35 | 0.26 | 0.41 |
+| Paraphrase éloignée | 0.11 | 0.16 | 0.26 | 0.42 | 0.53 |
 
 L'hybride bat chaque méthode seule : BM25 retrouve les termes exacts, le dense les
 reformulations, et leurs erreurs se recouvrent peu. Le reranker agit surtout sur le haut du
-classement : le MRR passe de 0,43 à 0,63, au prix de 1,9 s de latence au 95e centile et
-d'environ 6 $ pour 1 000 requêtes. Les paraphrases éloignées restent le point faible, avec un
-rappel@10 de 0,26 au mieux : c'est cet écart de vocabulaire que le fine-tuning des
-embeddings doit réduire. Pour les comparaisons entre une convention et le Code, le reranker
-retrouve l'article de convention dans 10 cas sur 17, mais l'article du Code dans
-2 seulement.
+classement : le MRR passe de 0,43 à 0,63, au prix de 2 à 3 s de latence et d'environ 6 $
+pour 1 000 requêtes. Le fine-tuning visait le point faible, les paraphrases éloignées : sur
+ce type, le dense passe de 0,16 à 0,42 de rappel@10 et la meilleure chaîne de 0,26 à 0,53.
+Reste la comparaison entre une convention et le Code : la meilleure chaîne retrouve
+l'article de convention dans 12 cas sur 17, mais celui du Code dans 2 seulement.
 
-La génération est mesurée sur l'échantillon d'annotation (80 questions, 16 par type) : les 5
-meilleurs articles de l'hybride reclassé sont fournis à Haiku 4.5, qui répond en les citant
-ou refuse.
+## Génération citée
 
-| Mesure | Valeur |
-|---|---:|
+Les 5 meilleurs articles de l'hybride reclassé sont fournis à Haiku 4,5, qui répond en les
+citant ou refuse. La mesure de référence est l'annotation humaine de l'échantillon (80
+questions, 16 par type, réponses produites sans le modèle affiné) :
+
+| Mesure humaine | Valeur [IC95] |
+|---|---|
+| Réponses correctes et fidèles aux articles cités | 35 / 80, soit 44 % [32 %, 55 %] |
+| Parmi les questions qui ont une réponse | 20 / 64, soit 31 % [20 %, 42 %] |
 | Refus corrects sur les questions hors corpus | 15 / 16 |
-| Refus à tort sur les questions qui ont une réponse | 11 / 64 |
-| Citations qui renvoient au contexte fourni | 98 % |
-| Article attendu parmi les citations | 58 % |
-| Latence p50 / p95 | 3.6 s / 6.0 s |
-| Coût pour 1 000 requêtes, reranker compris | 8.84 $ |
 
-Sur les 11 refus à tort, 7 viennent de la recherche : l'article attendu n'était pas parmi les
-5 articles fournis, et le modèle a eu raison de refuser. La justesse des réponses sera
-mesurée par un juge LLM, validé contre des étiquettes humaines.
+Sur tout le jeu de développement (165 questions), les mesures automatiques donnent
+15 refus corrects sur 17 questions hors corpus, 22 refus à tort sur 148 questions qui ont une
+réponse, 98 % de citations qui renvoient au contexte fourni et l'article attendu cité
+dans 66 % des cas, pour une latence de 3,0 s en médiane et 5,4 s au 95e centile,
+et 8,51 $ pour 1 000 requêtes, reranker compris.
+
+Le juge LLM (Sonnet 5,5) devait prendre le relais de l'annotation. Son kappa avec les
+étiquettes humaines vaut 0,46 [0,26 ; 0,66] sur les 64 questions qui ont une réponse, sous le seuil
+de 0,6 fixé avant le calcul : il n'est pas retenu. Il est trop indulgent : 14 des 17
+désaccords sont des réponses qu'il accepte et que l'annotation refuse. Sur le jeu de
+développement, il compterait 54 % de réussite là où l'annotation en trouve 31 % sur l'échantillon.
+
+## Référence externe : BSARD
+
+222 questions de test et 22633 articles de loi belges, sans entraînement sur BSARD :
+
+| Configuration | R@100 [IC95] | R@10 | MRR@100 |
+|---|---|---:|---:|
+| BM25 | 0.512 [0.456, 0.565] | 0.273 | 0.246 |
+| Dense (e5-small) | 0.502 [0.448, 0.556] | 0.274 | 0.266 |
+| Dense affiné sur le droit du travail | 0.529 [0.475, 0.583] | 0.266 | 0.267 |
+| Hybride RRF, dense affiné | 0.590 [0.536, 0.643] | 0.304 | 0.293 |
+
+Le fine-tuning sur le droit du travail français se transfère peu au droit belge : +0,027
+de R@100 [-0,012 ; +0,065], un gain que l'intervalle ne distingue pas de zéro. L'hybride
+gagne près de 8 points sur BM25 seul. À titre de repère, le meilleur modèle de l'article
+original, entraîné sur BSARD, atteint 74,8 %.
 
 ```bash
 make eval   # recalcule la ligne BM25 sur le jeu de développement
