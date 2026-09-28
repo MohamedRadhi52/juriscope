@@ -1,0 +1,37 @@
+{
+  "seuil": 0.6,
+  "toutes": {
+    "questions": 80,
+    "accord_brut": 0.7875,
+    "kappa": 0.5828220858895705,
+    "ic95": [
+      0.4102989090152118,
+      0.7500155860349126
+    ],
+    "humain_oui_juge_non": 3,
+    "humain_non_juge_oui": 14
+  },
+  "avec_reponse": {
+    "questions": 64,
+    "accord_brut": 0.734375,
+    "kappa": 0.4624505928853755,
+    "ic95": [
+      0.2595176858250955,
+      0.6627634660421545
+    ],
+    "humain_oui_juge_non": 3,
+    "humain_non_juge_oui": 14
+  },
+  "jugees_par_le_modele": {
+    "questions": 53,
+    "accord_brut": 0.6792452830188679,
+    "kappa": 0.3841421736158577,
+    "ic95": [
+      0.15168401292189163,
+      0.601517359952783
+    ],
+    "humain_oui_juge_non": 3,
+    "humain_non_juge_oui": 14
+  },
+  "juge_retenu": false
+}

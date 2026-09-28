@@ -1,0 +1,16 @@
+{
+  "questions": 165,
+  "reponses_illisibles": 0,
+  "refus_corrects": 0.8823529411764706,
+  "refus_a_tort": 0.14864864864864866,
+  "citations_dans_le_contexte": 0.984375,
+  "article_attendu_cite": 0.6621621621621622,
+  "latence_p50_s": 3.0263109840000197,
+  "latence_p95_s": 5.358609443799998,
+  "cout_1000_requetes": 8.506078787878787,
+  "reussite": 0.5757575757575758,
+  "reussite_avec_reponse": 0.5405405405405406,
+  "fidelite": 0.7380952380952381,
+  "justesse": 0.7619047619047619,
+  "cout_du_juge": 1.232408
+}
