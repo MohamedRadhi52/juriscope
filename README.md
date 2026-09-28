@@ -67,6 +67,10 @@ Les 62 rejets se répartissent ainsi : 39 extraits qui ne figurent pas mot pour 
 l'article, 19 questions qui recopient le texte, 3 paraphrases trop proches et 1 question mal formée. La
 génération a consommé 193 000 jetons en entrée et 79 000 en sortie, soit moins d'un dollar.
 
+La relecture de l'échantillon (80 questions, 16 par type) donne 65 questions claires et 71
+réponses attendues correctes. Les paraphrases sont les plus fragiles : 10 sur 16 dans les
+deux cas.
+
 ## Résultats sur le jeu de développement
 
 Les mesures portent sur les 148 questions du jeu de développement qui attendent au moins un

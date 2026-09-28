@@ -13,7 +13,7 @@ ANTHROPIC_URL = "https://api.anthropic.com/v1/messages"
 MISTRAL_URL = "https://api.mistral.ai/v1/chat/completions"
 AZURE_API_VERSION = "2024-10-21"
 # dollars par million de jetons, en entrée puis en sortie (tarifs publics, septembre 2026)
-PRICES = {"claude-haiku-4-5-20251001": (1.0, 5.0)}
+PRICES = {"claude-haiku-4-5-20251001": (1.0, 5.0), "claude-sonnet-5-5": (2.0, 10.0)}
 
 
 def cost(usages: list[dict], model: str) -> float:
@@ -47,11 +47,11 @@ def post_json(url: str, payload: dict, headers: dict, attempts: int = 8) -> dict
             time.sleep(2**attempt)
 
 
-def anthropic_complete(prompt: str, model: str) -> dict:
+def anthropic_complete(prompt: str, model: str, temperature: float = 0.7) -> dict:
     payload = {
         "model": model,
         "max_tokens": 1024,
-        "temperature": 0.7,
+        "temperature": temperature,
         "messages": [{"role": "user", "content": prompt}],
     }
     headers = {
@@ -62,7 +62,8 @@ def anthropic_complete(prompt: str, model: str) -> dict:
     data = post_json(ANTHROPIC_URL, payload, headers)
     return {
         "model": data["model"],
-        "output": data["content"][0]["text"],
+        # le texte suit parfois un bloc de réflexion : on prend le premier bloc de texte
+        "output": next(block["text"] for block in data["content"] if block["type"] == "text"),
         "usage": {
             "input_tokens": data["usage"]["input_tokens"],
             "output_tokens": data["usage"]["output_tokens"],

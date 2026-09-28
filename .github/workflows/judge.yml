@@ -1,0 +1,52 @@
+name: judge
+
+# Répond à tout le jeu de développement, valide le juge LLM contre les étiquettes humaines
+# (kappa de Cohen), puis juge les réponses et commite les résultats.
+on:
+  push:
+    branches: [main]
+    paths:
+      - src/juriscope/eval/judge.py
+      - src/juriscope/eval/agreement.py
+      - .github/workflows/judge.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  judge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+          cache: pip
+      - uses: actions/cache@v6
+        with:
+          path: data/raw
+          key: npm-${{ hashFiles('data/sources.json') }}
+      - run: make data
+      - name: Vecteurs du workflow embed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release download embeddings --dir data/index --clobber
+      - name: Réponses du jeu de développement
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: .venv/bin/python -m juriscope.generate.run_generation --dev
+      - name: Juge et accord avec les étiquettes humaines
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: .venv/bin/python -m juriscope.eval.judge | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Commit des résultats
+        if: ${{ !cancelled() }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add results
+          git diff --cached --quiet || git commit -m "Juge LLM : accord avec les étiquettes humaines et réponses du jeu de développement"
+          git pull --rebase
+          git push

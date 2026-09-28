@@ -114,3 +114,13 @@ def test_azure_openai_uses_the_deployment_url_and_api_key(monkeypatch):
     )
     assert sent["headers"]["api-key"] == "cle-de-test"
     assert answer["usage"] == {"input_tokens": 10, "output_tokens": 5}
+
+
+def test_anthropic_text_is_taken_after_a_thinking_block(monkeypatch):
+    def fake_post(url, payload, headers):
+        blocks = [{"type": "thinking", "thinking": "..."}, {"type": "text", "text": "ok"}]
+        return {"model": "m", "content": blocks, "usage": {"input_tokens": 1, "output_tokens": 1}}
+
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "cle-de-test")
+    monkeypatch.setattr(providers, "post_json", fake_post)
+    assert providers.anthropic_complete("Q ?", "m")["output"] == "ok"

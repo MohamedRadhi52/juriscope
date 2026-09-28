@@ -4,7 +4,9 @@ Les réponses déjà écrites dans results/generation/answers.jsonl ne sont jama
 sont elles que l'on étiquette à la main pour valider le juge.
 """
 
+import argparse
 import json
+from pathlib import Path
 
 import numpy as np
 
@@ -43,23 +45,38 @@ def summarize(rows: list[dict]) -> dict:
     }
 
 
-def main() -> None:
+def answer_all(questions: list[dict], path: Path) -> list[dict]:
+    """Répond aux questions absentes du fichier, puis renvoie toutes ses réponses."""
     articles = load_corpus()
     by_cid = {a["cid"]: a for a in articles}
-    answers = OUTPUT / "answers.jsonl"
-    done = {row["id"] for row in read_jsonl(answers)} if answers.exists() else set()
-    todo = [q for q in sample(read_jsonl(EVAL), 80, SEED) if q["id"] not in done]
-    retriever = build("rerank", articles)
-    OUTPUT.mkdir(parents=True, exist_ok=True)
+    done = {row["id"] for row in read_jsonl(path)} if path.exists() else set()
+    todo = [q for q in questions if q["id"] not in done]
+    retriever = build("rerank", articles) if todo else None
+    path.parent.mkdir(parents=True, exist_ok=True)
     for number, question in enumerate(todo, 1):
         result = answer(question["question"], retriever, by_cid, anthropic_complete, MODEL)
         row = {"id": question["id"], "type": question["type"], "relevant": question["relevant"]}
-        with answers.open("a", encoding="utf-8") as f:
+        with path.open("a", encoding="utf-8") as f:
             f.write(json.dumps(row | result, ensure_ascii=False) + "\n")
         print(f"{number}/{len(todo)} {question['id']} {question['type']}")
+    return read_jsonl(path)
 
-    summary = summarize(read_jsonl(answers))
-    (OUTPUT / "summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n")
+
+def main() -> None:
+    parser = argparse.ArgumentParser(prog="python -m juriscope.generate.run_generation")
+    parser.add_argument("--dev", action="store_true", help="tout le jeu de développement")
+    args = parser.parse_args()
+    questions = read_jsonl(EVAL)
+    if args.dev:
+        rows = answer_all(
+            [q for q in questions if q["split"] == "dev"], OUTPUT / "dev_answers.jsonl"
+        )
+        name = "dev_summary.json"
+    else:
+        rows = answer_all(sample(questions, 80, SEED), OUTPUT / "answers.jsonl")
+        name = "summary.json"
+    summary = summarize(rows)
+    (OUTPUT / name).write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n")
     print("| Mesure | Valeur |\n|---|---:|")
     for key, value in summary.items():
         print(f"| {key} | {value:.3f} |" if isinstance(value, float) else f"| {key} | {value} |")

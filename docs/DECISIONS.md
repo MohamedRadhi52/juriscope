@@ -227,3 +227,14 @@ Anthropic, Mistral et Azure OpenAI renvoient la même forme de réponse : modèl
 et jetons. Azure OpenAI est couvert par un test avec une API simulée : il suffit de définir
 `AZURE_OPENAI_ENDPOINT` et `AZURE_OPENAI_API_KEY`, puis de passer le nom du déploiement comme
 modèle.
+
+## Juge LLM validé avant usage, seuil fixé d'avance
+
+Le juge est un autre modèle que le générateur (Sonnet 5.5 contre Haiku 4.5), à température
+nulle, et il applique la grille donnée aux annotateurs : une réponse réussit si elle est
+fidèle aux articles cités et juste. Les refus se jugent par règle, sans modèle. Seuil fixé
+avant tout calcul : le juge est retenu si son kappa de Cohen avec les étiquettes humaines
+atteint 0,6 sur les 64 questions de l'échantillon qui ont une réponse, soit un accord
+substantiel sur l'échelle de Landis et Koch. L'intervalle à 95 % vient de 2 000 tirages des
+paires d'étiquettes. Le kappa est aussi donné sur les seules réponses jugées par le modèle,
+pour ne pas le gonfler avec les refus jugés par règle.
