@@ -141,6 +141,12 @@ mot pour mot dans l'article, si elle reprend 7 mots consécutifs du texte, ou, p
 paraphrase, si plus de 40 % de ses mots pleins figurent dans l'article. Les doublons sont
 retirés. Chaque rejet est compté par motif dans `results/evalset/verification.json`.
 
+La comparaison des extraits ignore la casse, les accents et la ponctuation, et accepte les
+coupures signalées par [...] ; une question terminée par un point reçoit un point
+d'interrogation. La première version, stricte sur ces détails de forme, rejetait 138
+questions sur 338, dont 80 pour un simple point final ; la version actuelle en rejette 62,
+dont 39 extraits qui omettent des mots sans le signaler.
+
 ## Jeu figé avant tout réglage
 
 Le jeu est séparé en développement (60 %) et test (40 %) dans chaque type, puis commité par

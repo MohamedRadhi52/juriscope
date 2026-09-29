@@ -54,6 +54,19 @@ mot dans l'article, la question ne doit pas recopier le texte, et une paraphrase
 par le workflow `evalset` avant tout réglage de la recherche, et un échantillon de 80
 questions est relu à la main selon [docs/eval_guidelines.md](docs/eval_guidelines.md).
 
+| Type | Générées | Retenues | Dev | Test |
+|---|---:|---:|---:|---:|
+| Factuelle | 180 | 159 | 95 | 64 |
+| Paraphrase | 40 | 31 | 19 | 12 |
+| Multi-articles | 40 | 29 | 17 | 12 |
+| Convention contre Code | 38 | 28 | 17 | 11 |
+| Hors corpus | 40 | 29 | 17 | 12 |
+| Total | 338 | 276 | 165 | 111 |
+
+Les 62 rejets se répartissent ainsi : 39 extraits qui ne figurent pas mot pour mot dans
+l'article, 19 questions qui recopient le texte, 3 paraphrases trop proches et 1 question mal formée. La
+génération a consommé 193 000 jetons en entrée et 79 000 en sortie, soit moins d'un dollar.
+
 ## Premiers résultats
 
 Jeu pilote de 30 questions (`data/questions/pilote.jsonl`), BM25 sur les 24 399 articles,
