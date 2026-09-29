@@ -154,6 +154,32 @@ de R@100 [-0,012 ; +0,065], un gain que l'intervalle ne distingue pas de zéro. 
 gagne près de 8 points sur BM25 seul. À titre de repère, le meilleur modèle de l'article
 original, entraîné sur BSARD, atteint 74,8 %.
 
+## Agent
+
+L'agent est un graphe LangGraph : à chaque tour, Haiku 4.5 choisit un outil d'après les
+résultats déjà obtenus, au plus quatre fois, puis rédige la réponse. Ses outils sont la
+recherche citée (hybride affiné et reranker), la lecture d'un article par son numéro, une
+requête SQL en lecture seule sur les métadonnées des conventions, et le rapport de veille.
+Sur 30 scénarios à critères vérifiables (valeurs attendues, articles cités, refus) :
+
+| Type de scénario | Scénarios | Agent | RAG simple |
+|---|---:|---:|---:|
+| Lecture d'article | 5 | 5 | 5 |
+| Recherche simple | 8 | 7 | 7 |
+| Hors périmètre | 3 | 3 | 3 |
+| Conventions (données SQL) | 5 | 5 | 1 |
+| Veille | 3 | 3 | 0 |
+| Plusieurs étapes | 6 | 6 | 2 |
+| **Total** | **30** | **29** | **18** |
+
+Sur les types que le RAG simple peut traiter (lecture d'article, recherche, hors périmètre),
+les deux font jeu égal, 15 sur 16. L'agent gagne là où il faut des données absentes des
+textes, métadonnées des conventions et veille, et sur les questions à plusieurs étapes. Il
+n'a fait aucune erreur d'outil, en utilise 1,2 par question, et répond en 7,4 s au 95e
+centile. Les scénarios ont été écrits en même temps que les outils, et les questions à
+plusieurs étapes ne sont que six : ces chiffres montrent que l'agent fonctionne, pas l'ampleur
+exacte de son avantage.
+
 ## Veille des modifications
 
 Entre les versions de fin juillet 2026 (legi-data 2.552.0, kali-data 3.485.0) et les
