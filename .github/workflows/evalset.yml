@@ -30,11 +30,15 @@ jobs:
         env:
           MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
       - run: .venv/bin/python -m juriscope.evalset.verify
+      # même après un échec, les questions déjà produites sont gardées pour la reprise
       - name: Commit du jeu
+        if: ${{ !cancelled() }}
+        env:
+          MESSAGE: ${{ job.status == 'success' && 'Jeu d''évaluation généré et vérifié' || 'Génération du jeu d''évaluation interrompue, à reprendre' }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/questions results/evalset
-          git diff --cached --quiet || git commit -m "Jeu d'évaluation généré et vérifié"
+          git diff --cached --quiet || git commit -m "$MESSAGE"
           git pull --rebase
           git push

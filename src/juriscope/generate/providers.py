@@ -9,8 +9,9 @@ from urllib.request import Request, urlopen
 MISTRAL_URL = "https://api.mistral.ai/v1/chat/completions"
 
 
-def post_json(url: str, payload: dict, headers: dict, attempts: int = 6) -> dict:
+def post_json(url: str, payload: dict, headers: dict, attempts: int = 8) -> dict:
     """POST JSON ; attend puis réessaie si l'API signale une limite de débit ou une panne."""
+    headers = headers | {"User-Agent": "juriscope"}
     request = Request(url, data=json.dumps(payload).encode(), headers=headers)
     for attempt in range(attempts):
         try:
@@ -19,7 +20,8 @@ def post_json(url: str, payload: dict, headers: dict, attempts: int = 6) -> dict
         except HTTPError as error:
             retryable = error.code == 429 or error.code >= 500
             if not retryable or attempt == attempts - 1:
-                raise
+                detail = error.read().decode(errors="replace")[:500]
+                raise RuntimeError(f"{url} a répondu {error.code} : {detail}") from error
             time.sleep(2**attempt)
 
 
