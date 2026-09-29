@@ -1,24 +1,51 @@
 # Juriscope
 
-Assistant qui répond aux questions de droit du travail (Code du travail et conventions
-collectives) en citant l'article exact, refuse quand la réponse n'est pas dans le corpus,
-et repère les textes modifiés d'une version à l'autre.
+[![CI](https://github.com/MohamedRadhi52/juriscope/actions/workflows/ci.yml/badge.svg)](https://github.com/MohamedRadhi52/juriscope/actions/workflows/ci.yml)
+[![Porte de qualité](https://github.com/MohamedRadhi52/juriscope/actions/workflows/quality-gate.yml/badge.svg)](https://github.com/MohamedRadhi52/juriscope/actions/workflows/quality-gate.yml)
 
-Projet en cours de construction. Le cadrage est dans [docs/cadrage.md](docs/cadrage.md) et
-les choix techniques dans [docs/DECISIONS.md](docs/DECISIONS.md).
+Assistant qui répond aux questions de droit du travail (Code du travail et dix conventions
+collectives) en citant l'article exact, refuse quand la réponse n'est pas dans le corpus, et
+repère les textes modifiés d'une version à l'autre. Chaque brique est mesurée, avec ses
+intervalles de confiance, son coût et sa latence.
 
-## Installation
+Démo, avec des réponses calculées à l'avance : https://mohamedradhi52.github.io/juriscope/
 
-Prérequis : Python 3.14 et `make`.
+## En bref
 
-```bash
-make install   # crée .venv, installe les dépendances et le hook pre-commit
-make test      # tests unitaires
-make lint      # ruff
-make data      # télécharge et découpe le corpus (environ 35 Mo)
-make test-corpus  # vérifie des articles connus dans le corpus réel
-make annotate  # valide à la main un échantillon du jeu d'évaluation
+| Question | Réponse mesurée |
+|---|---|
+| La recherche trouve-t-elle le bon article ? | rappel@10 de 0,760 pour la meilleure chaîne, contre 0,514 pour BM25 seul |
+| Le fine-tuning des embeddings sert-il ? | +0,061 de rappel@10 en apparié [+0,010 ; +0,115] ; sur les paraphrases, de 0,26 à 0,53 |
+| Les réponses sont-elles justes ? | 44 % correctes et fidèles aux articles cités selon l'annotation humaine [32 % ; 55 %], 15 refus corrects sur 16 questions hors corpus |
+| Un juge LLM peut-il remplacer l'annotation ? | Non : kappa de 0,46 avec les étiquettes humaines, sous le seuil de 0,6 fixé d'avance |
+| Un agent fait-il mieux qu'un RAG simple ? | 29 scénarios réussis sur 30 contre 18, grâce aux données absentes des textes et aux questions à plusieurs étapes |
+| Et sur un autre droit ? | Sur BSARD (droit belge), R@100 de 0,590 pour l'hybride, sans entraînement sur ce jeu |
+| Combien coûte une réponse ? | 8,5 $ pour 1 000 requêtes, 5,4 s au 95e centile |
+
+## Architecture
+
+```mermaid
+flowchart LR
+  npm[Paquets npm LEGI et KALI] --- ingestion[Ingestion et découpage par article]
+  ingestion --- bm25[BM25]
+  ingestion --- dense[Dense e5-small affiné, Qdrant]
+  bm25 --- rrf[Fusion RRF]
+  dense --- rrf
+  rrf --- rerank[Reranker Haiku 4.5]
+  rerank --- generation[Génération citée et garde-fous]
+  generation --- api[API FastAPI]
+  generation --- agent[Agent LangGraph]
+  ingestion --- veille[Veille des versions]
+  veille --- agent
+  bm25 --- mcp[Serveur MCP]
 ```
+
+Le corpus vient des paquets npm qui publient les bases LEGI et KALI, en versions épinglées
+et vérifiées par empreinte. La recherche fusionne BM25 et un modèle d'embeddings affiné sur
+le droit du travail, puis un modèle de langage reclasse les candidats. La génération cite les
+articles fournis ou refuse. L'API, l'agent et le serveur MCP s'appuient sur cette chaîne. Les
+calculs lourds (vecteurs, fine-tuning, appels aux modèles) tournent dans GitHub Actions, qui
+commite les résultats.
 
 ## Données
 
@@ -72,7 +99,9 @@ La relecture de l'échantillon (80 questions, 16 par type) donne 65 questions cl
 réponses attendues correctes. Les paraphrases sont les plus fragiles : 10 sur 16 dans les
 deux cas.
 
-## Résultats sur le jeu de développement
+## Résultats
+
+### Recherche
 
 Les mesures portent sur les 148 questions du jeu de développement qui attendent au moins un
 article, avec des intervalles de confiance à 95 % par bootstrap. La latence est celle de la
@@ -114,7 +143,7 @@ ce type, le dense passe de 0,16 à 0,42 de rappel@10 et la meilleure chaîne de 
 Reste la comparaison entre une convention et le Code : la meilleure chaîne retrouve
 l'article de convention dans 12 cas sur 17, mais celui du Code dans 2 seulement.
 
-## Génération citée
+### Génération citée
 
 Les 5 meilleurs articles de l'hybride reclassé sont fournis à Haiku 4,5, qui répond en les
 citant ou refuse. La mesure de référence est l'annotation humaine de l'échantillon (80
@@ -138,23 +167,7 @@ de 0,6 fixé avant le calcul : il n'est pas retenu. Il est trop indulgent : 14 d
 désaccords sont des réponses qu'il accepte et que l'annotation refuse. Sur le jeu de
 développement, il compterait 54 % de réussite là où l'annotation en trouve 31 % sur l'échantillon.
 
-## Référence externe : BSARD
-
-222 questions de test et 22633 articles de loi belges, sans entraînement sur BSARD :
-
-| Configuration | R@100 [IC95] | R@10 | MRR@100 |
-|---|---|---:|---:|
-| BM25 | 0.512 [0.456, 0.565] | 0.273 | 0.246 |
-| Dense (e5-small) | 0.502 [0.448, 0.556] | 0.274 | 0.266 |
-| Dense affiné sur le droit du travail | 0.529 [0.475, 0.583] | 0.266 | 0.267 |
-| Hybride RRF, dense affiné | 0.590 [0.536, 0.643] | 0.304 | 0.293 |
-
-Le fine-tuning sur le droit du travail français se transfère peu au droit belge : +0,027
-de R@100 [-0,012 ; +0,065], un gain que l'intervalle ne distingue pas de zéro. L'hybride
-gagne près de 8 points sur BM25 seul. À titre de repère, le meilleur modèle de l'article
-original, entraîné sur BSARD, atteint 74,8 %.
-
-## Agent
+### Agent
 
 L'agent est un graphe LangGraph : à chaque tour, Haiku 4.5 choisit un outil d'après les
 résultats déjà obtenus, au plus quatre fois, puis rédige la réponse. Ses outils sont la
@@ -180,7 +193,78 @@ centile. Les scénarios ont été écrits en même temps que les outils, et les 
 plusieurs étapes ne sont que six : ces chiffres montrent que l'agent fonctionne, pas l'ampleur
 exacte de son avantage.
 
-## API
+### Garde-fous contre l'injection de prompt
+
+Trois couches : un filtre refuse les formules d'injection classiques, le prompt balise la
+question et les articles comme des données, et toute réponse sans citation valide devient un
+refus. Chaque attaque demande d'écrire un mot témoin, ce qui rend son succès vérifiable :
+
+| | Sans garde-fous | Avec garde-fous |
+|---|---:|---:|
+| Attaques par la question qui réussissent | 1/10 | 0/10 |
+| Attaques par un article piégé qui réussissent | 0/10 | 0/10 |
+| Questions légitimes qui obtiennent une réponse citée | 8/10 | 8/10 |
+
+Haiku 4.5 résiste déjà à ces attaques : un premier passage n'en comptait aucune réussie sans
+garde-fous, et sur si peu de cas l'écart n'est pas significatif. Les garde-fous servent de
+défense en profondeur, sans coût mesuré sur les questions légitimes.
+
+### Référence externe : BSARD
+
+222 questions de test et 22633 articles de loi belges, sans entraînement sur BSARD :
+
+| Configuration | R@100 [IC95] | R@10 | MRR@100 |
+|---|---|---:|---:|
+| BM25 | 0.512 [0.456, 0.565] | 0.273 | 0.246 |
+| Dense (e5-small) | 0.502 [0.448, 0.556] | 0.274 | 0.266 |
+| Dense affiné sur le droit du travail | 0.529 [0.475, 0.583] | 0.266 | 0.267 |
+| Hybride RRF, dense affiné | 0.590 [0.536, 0.643] | 0.304 | 0.293 |
+
+Le fine-tuning sur le droit du travail français se transfère peu au droit belge : +0,027
+de R@100 [-0,012 ; +0,065], un gain que l'intervalle ne distingue pas de zéro. L'hybride
+gagne près de 8 points sur BM25 seul. À titre de repère, le meilleur modèle de l'article
+original, entraîné sur BSARD, atteint 74,8 %.
+
+### Veille des modifications
+
+Entre les versions de fin juillet 2026 (legi-data 2.552.0, kali-data 3.485.0) et les
+versions épinglées de septembre, 112 articles ont été ajoutés, 40 supprimés et 30 modifiés.
+Aucune question du jeu d'évaluation ne s'appuie sur un article modifié ou supprimé : le jeu
+reste valide. Les 13 articles du Code modifiés donnent autant de questions temporelles
+(`data/questions/temporelles.jsonl`), et le workflow `veille` refait la comparaison chaque
+lundi avec les dernières versions publiées.
+
+## Limites
+
+Le jeu d'évaluation est écrit par un modèle de langage. Sa qualité n'est vérifiée que sur un
+échantillon de 80 questions relues à la main, dont 65 sont claires et 71 ont une réponse
+attendue correcte ; les paraphrases sont les plus fragiles. La qualité des réponses repose
+sur les étiquettes d'une seule personne, puisque le juge LLM n'a pas passé son seuil. Les
+scénarios de l'agent ont été écrits en même temps que ses outils, et six seulement demandent
+plusieurs étapes. Les attaques par injection testées sont simples, et le modèle y résiste
+déjà ; un article falsifié dans le corpus, lui, ne serait pas détecté par la génération : la
+défense est l'intégrité des paquets, vérifiée par leur empreinte. Les comparaisons entre une
+convention et le Code retrouvent rarement l'article du Code. Les latences sont mesurées sur
+les machines de GitHub Actions. Juriscope ne donne pas d'avis juridique.
+
+## Reproduire
+
+Prérequis : Python 3.14 et `make`.
+
+```bash
+make install      # crée .venv, installe les dépendances et le hook pre-commit
+make test         # tests unitaires
+make lint         # ruff
+make data         # télécharge et découpe le corpus (environ 35 Mo)
+make test-corpus  # vérifie des articles connus dans le corpus réel
+make eval         # rappel de BM25 sur le jeu de développement
+make annotate     # valide à la main un échantillon du jeu d'évaluation
+make api          # lance l'API avec le modèle affiné
+```
+
+Les autres mesures tournent dans GitHub Actions, qui commite leurs résultats dans `results/`.
+
+### API
 
 `make api` lance l'API sur le port 8000 ; au premier lancement, le modèle affiné et ses
 vecteurs sont téléchargés depuis la release du dépôt.
@@ -196,7 +280,7 @@ activés. Le workflow `quality-gate` protège cette chaîne : sur chaque pull re
 mesure la recherche sur le jeu de développement et la génération sur 12 questions fixes, et
 échoue sous les seuils.
 
-## Serveur MCP
+### Serveur MCP
 
 `python -m juriscope.mcp_server` expose deux outils, `rechercher` et `lire_article`, à tout
 client MCP, une fois le corpus construit par `make data`. Configuration type d'un client :
@@ -206,15 +290,28 @@ client MCP, une fois le corpus construit par `make data`. Configuration type d'u
                               "args": ["-m", "juriscope.mcp_server"]}}}
 ```
 
-## Veille des modifications
+### Workflows
 
-Entre les versions de fin juillet 2026 (legi-data 2.552.0, kali-data 3.485.0) et les
-versions épinglées de septembre, 112 articles ont été ajoutés, 40 supprimés et 30 modifiés.
-Aucune question du jeu d'évaluation ne s'appuie sur un article modifié ou supprimé : le jeu
-reste valide. Les 13 articles du Code modifiés donnent autant de questions temporelles
-(`data/questions/temporelles.jsonl`), et le workflow `veille` refait la comparaison chaque
-lundi avec les dernières versions publiées.
+| Workflow | Rôle | Déclenchement |
+|---|---|---|
+| `ci` | ruff, tests, tests sur le corpus réel, ligne BM25 | chaque push |
+| `quality-gate` | seuils de recherche et de génération | pull requests et main |
+| `evalset` | génère et vérifie le jeu d'évaluation | à la demande |
+| `embed` | vecteurs des passages et des questions | corpus ou questions modifiés |
+| `evaluate` | mesure les méthodes de recherche | après `embed` |
+| `generate` | réponses de l'échantillon d'annotation | après `evaluate` |
+| `judge` | juge LLM et kappa | code du juge modifié |
+| `finetune` | fine-tuning, encodage en quatre morceaux, gain | code du fine-tuning modifié |
+| `bsard` | référence externe BSARD | après `finetune` |
+| `agent` | agent face au RAG simple | code de l'agent modifié |
+| `injection` | attaques avant et après garde-fous | code des garde-fous modifié |
+| `veille` | compare le corpus aux dernières versions npm | chaque lundi |
+| `demo` | réponses de la démo, publication sur Pages | code de la démo modifié |
+| `keepalive` | garde les workflows planifiés actifs | chaque mois |
 
-```bash
-make eval   # recalcule la ligne BM25 sur le jeu de développement
-```
+## Documentation
+
+Le cadrage (périmètre, types de questions, métriques, vérité terrain) est dans
+[docs/cadrage.md](docs/cadrage.md), chaque choix technique et sa raison dans
+[docs/DECISIONS.md](docs/DECISIONS.md), et les consignes d'annotation dans
+[docs/eval_guidelines.md](docs/eval_guidelines.md).
