@@ -12,6 +12,7 @@ from collections import Counter, defaultdict
 from juriscope.corpus import load_corpus, read_jsonl
 from juriscope.evalset.generate_questions import OUTPUT as GENERATED
 from juriscope.evalset.generate_questions import load_css
+from juriscope.generate.providers import extract_json
 from juriscope.paths import DATA, ROOT
 from juriscope.retrieve.text import fold, tokenize
 
@@ -57,15 +58,6 @@ def overlap(question: str, text: str) -> float:
     return len(tokens & set(tokenize(text))) / len(tokens) if tokens else 1.0
 
 
-def parse_output(raw: str) -> dict | None:
-    """Objet JSON de la réponse, même entouré de texte ou d'un bloc de code."""
-    start, end = raw.find("{"), raw.rfind("}")
-    try:
-        return json.loads(raw[start : end + 1])
-    except json.JSONDecodeError:
-        return None
-
-
 def rejection(output: dict, kind: str, texts: list[str]) -> str | None:
     """Motif de rejet d'une question générée, ou None si elle passe les vérifications."""
     question = as_question(output.get("question", ""))
@@ -103,7 +95,7 @@ def main() -> None:
     generated = read_jsonl(GENERATED)
     kept, rejected, seen = [], defaultdict(list), set()
     for item in generated:
-        output = parse_output(item["output"])
+        output = extract_json(item["output"])
         texts = [articles[source["cid"]]["text"] for source in item["sources"]]
         reason = (
             "réponse JSON invalide" if output is None else rejection(output, item["type"], texts)

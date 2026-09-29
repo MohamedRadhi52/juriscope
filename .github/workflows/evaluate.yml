@@ -1,0 +1,51 @@
+name: evaluate
+
+# Mesure chaque méthode de recherche sur le jeu de développement dès que le workflow embed a
+# publié de nouveaux vecteurs, puis commite les résultats. Le reranker appelle l'API Anthropic.
+on:
+  workflow_run:
+    workflows: [embed]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  evaluate:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+          cache: pip
+      - uses: actions/cache@v6
+        with:
+          path: data/raw
+          key: npm-${{ hashFiles('data/sources.json') }}
+      - run: make data
+      - name: Vecteurs du workflow embed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release download embeddings --dir data/index --clobber
+      - name: Évaluation sur le jeu de développement
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          for retriever in bm25 dense hybride rerank; do
+            .venv/bin/python -m juriscope.eval.run_eval data/questions/eval.jsonl \
+              --split dev --retriever "$retriever" | tee -a evaluation.log
+          done
+          grep -m 2 '^|' evaluation.log >> "$GITHUB_STEP_SUMMARY"
+          grep '^| [BDH]' evaluation.log >> "$GITHUB_STEP_SUMMARY"
+      - name: Commit des résultats
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add results
+          git diff --cached --quiet || git commit -m "Évaluation de la recherche sur le jeu de développement"
+          git pull --rebase
+          git push

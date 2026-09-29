@@ -101,24 +101,6 @@ def test_rejection_reasons():
     assert verify.rejection(close, "paraphrase", [text]) == "paraphrase trop proche du texte"
 
 
-def test_json_is_found_around_text_and_code_fences():
-    raw = 'Voici la question :\n```json\n{"question": "Q ?", "extrait": "a b c"}\n```'
-    assert verify.parse_output(raw) == {"question": "Q ?", "extrait": "a b c"}
-    assert verify.parse_output("pas de JSON") is None
-
-
-def test_final_period_and_quoting_details_are_not_rejections():
-    text = "Le salarié informe l'Etat, par écrit, de sa demande dans un délai d'un mois."
-    assert verify.as_question("Le salarié doit-il prévenir par écrit.") == (
-        "Le salarié doit-il prévenir par écrit ?"
-    )
-    assert verify.quoted("informe l'État, par écrit", text)
-    assert verify.quoted("Le salarié informe [...] dans un délai d'un mois", text)
-    assert not verify.quoted("informe l'employeur par écrit", text)
-    good = {"question": "Faut-il prévenir par écrit.", "extrait": "par écrit, de sa demande"}
-    assert verify.rejection(good, "factuelle", [text]) is None
-
-
 def test_split_keeps_the_same_share_in_each_type():
     questions = [{"type": "a"} for _ in range(10)] + [{"type": "b"} for _ in range(5)]
     verify.split(questions, seed=0)

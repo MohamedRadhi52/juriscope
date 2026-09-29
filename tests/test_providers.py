@@ -85,3 +85,14 @@ def test_mistral_request_uses_json_mode_and_same_answer_shape(monkeypatch):
         "output": '{"question": "Q ?"}',
         "usage": {"input_tokens": 10, "output_tokens": 5},
     }
+
+
+def test_json_is_found_around_text_and_code_fences():
+    raw = 'Voici la question :\n```json\n{"question": "Q ?", "extrait": "a b c"}\n```'
+    assert providers.extract_json(raw) == {"question": "Q ?", "extrait": "a b c"}
+    assert providers.extract_json("pas de JSON") is None
+
+
+def test_cost_uses_the_public_prices():
+    usages = [{"input_tokens": 600_000, "output_tokens": 100_000}] * 2
+    assert providers.cost(usages, "claude-haiku-4-5-20251001") == 2.2

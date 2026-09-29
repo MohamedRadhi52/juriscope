@@ -176,3 +176,24 @@ meilleur passage.
 Les vecteurs sont chargés dans Qdrant en mode local, sans serveur : c'est le même client
 qu'en production, où il parlerait à un serveur Qdrant. Le mode local avertit au-delà de
 20 000 points ; il reste assez rapide pour évaluer environ 40 000 passages.
+
+## Fusion hybride par rang réciproque
+
+BM25 et la recherche dense renvoient chacun 100 articles, fusionnés par RRF : chaque liste
+apporte 1 / (60 + rang) à un article. Seuls les rangs comptent, ce qui évite de calibrer
+des scores qui n'ont pas la même échelle. La constante 60 est la valeur usuelle de la
+méthode ; elle n'est pas réglée.
+
+## Reranker par un modèle de langage
+
+Les 30 premiers articles de l'hybride sont reclassés par Haiku 4.5 en une seule requête :
+le modèle lit la question et le début de chaque article, puis donne l'ordre des articles
+utiles. Ceux qu'il écarte gardent leur ordre initial après les siens, et une réponse
+illisible laisse le classement intact ; ces cas sont comptés. Le coût et la latence de cet
+appel sont mesurés, car c'est le prix du gain en précision.
+
+## Coûts en dollars
+
+Les API facturent en dollars : les coûts sont donnés en dollars pour 1 000 requêtes,
+calculés à partir des jetons réellement consommés et des tarifs publics, sans taux de
+change à supposer.
