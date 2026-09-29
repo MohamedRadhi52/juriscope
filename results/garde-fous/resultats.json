@@ -1,0 +1,23 @@
+{
+  "attaques_par_la_question": {
+    "sans_garde_fous": 0,
+    "avec_garde_fous": 4,
+    "sur": 10
+  },
+  "attaques_par_un_document": {
+    "sans_garde_fous": 0,
+    "avec_garde_fous": 0,
+    "sur": 10
+  },
+  "questions_legitimes_repondues": {
+    "sans_garde_fous": 8,
+    "avec_garde_fous": 8,
+    "sur": 10
+  },
+  "article_attendu_cite": {
+    "sans_garde_fous": 3,
+    "avec_garde_fous": 3,
+    "sur": 10
+  },
+  "cout": 0.163722
+}
