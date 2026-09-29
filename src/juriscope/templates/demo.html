@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Juriscope, questions de droit du travail</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #ffffff;
+    --ink: #1d2433;
+    --muted: #5b6472;
+    --rule: #e3e5e8;
+    --wash: #f5f6f8;
+    --code-red: #a4161a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font: 400 1.0625rem/1.65 Spectral, Georgia, serif;
+  }
+  a { color: var(--code-red); }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--code-red); outline-offset: 2px; }
+  header, footer, main { max-width: 76rem; margin: 0 auto; padding: 0 1.5rem; }
+  header { padding-top: 3rem; padding-bottom: 2rem; border-bottom: 1px solid var(--rule); }
+  h1 { font-size: 2.6rem; font-weight: 600; line-height: 1.1; margin: 0; }
+  .tagline { font-size: 1.35rem; font-style: italic; margin: 0.4rem 0 1rem; }
+  .about { max-width: 42rem; color: var(--muted); margin: 0; }
+  main {
+    display: grid;
+    grid-template-columns: 17rem minmax(0, 40rem) 15rem;
+    gap: 2.5rem;
+    padding-top: 2rem;
+    padding-bottom: 3rem;
+  }
+  nav h2 { font-size: 1rem; font-weight: 600; margin: 1.4rem 0 0.3rem; }
+  nav h2:first-child { margin-top: 0; }
+  nav ul { list-style: none; margin: 0; padding: 0; }
+  nav button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    font: inherit;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    color: var(--ink);
+    background: none;
+    border: 0;
+    border-left: 3px solid transparent;
+    padding: 0.35rem 0 0.35rem 0.7rem;
+    cursor: pointer;
+  }
+  nav button:hover { background: var(--wash); }
+  nav button[aria-current="true"] { border-left-color: var(--code-red); background: var(--wash); }
+  #question { font-size: 1.7rem; font-weight: 600; line-height: 1.25; margin: 0 0 1rem; }
+  #answer { white-space: pre-line; margin: 0; }
+  #answer.refusal { color: var(--muted); font-style: italic; }
+  #meta { color: var(--muted); font-size: 0.9rem; margin-top: 1.2rem; }
+  aside { border-left: 1px solid var(--rule); padding-left: 1.2rem; }
+  aside h2 { font-size: 1rem; font-weight: 600; margin: 0 0 0.6rem; }
+  .cite { margin-bottom: 1.2rem; }
+  .cite .number { color: var(--code-red); font-weight: 600; font-size: 1.15rem; }
+  .cite .title { color: var(--muted); font-size: 0.85rem; line-height: 1.4; }
+  .cite .changed { font-style: italic; font-size: 0.85rem; }
+  .cite a { font-size: 0.9rem; }
+  footer { border-top: 1px solid var(--rule); color: var(--muted); font-size: 0.9rem; padding-top: 1rem; padding-bottom: 3rem; }
+  @media (max-width: 60rem) {
+    main { grid-template-columns: 1fr; gap: 1.5rem; }
+    aside { border-left: 0; border-top: 1px solid var(--rule); padding: 1rem 0 0; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    #reading.fresh { animation: settle 0.25s ease-out; }
+    @keyframes settle { from { opacity: 0.4; } to { opacity: 1; } }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Juriscope</h1>
+  <p class="tagline">Questions de droit du travail, réponses citées article par article.</p>
+  <p class="about">Ces réponses ont été produites à l'avance par la chaîne mesurée dans le dépôt :
+    recherche hybride avec un modèle d'embeddings affiné, reclassement, puis génération qui cite
+    ses sources ou refuse. <a href="https://github.com/MohamedRadhi52/juriscope">Code, protocole et mesures sur GitHub</a>.</p>
+</header>
+<main>
+  <nav aria-label="Questions"></nav>
+  <section id="reading" aria-live="polite">
+    <h2 id="question"></h2>
+    <p id="answer"></p>
+    <p id="meta"></p>
+  </section>
+  <aside aria-label="Articles cités">
+    <h2>Articles cités</h2>
+    <div id="cites"></div>
+  </aside>
+</main>
+<footer>
+  Sources : bases LEGI et KALI de la DILA, sous Licence Ouverte, versions __VERSIONS__.
+  Juriscope ne donne pas d'avis juridique.
+</footer>
+<script>
+const answers = __ANSWERS__;
+const nav = document.querySelector("nav");
+const buttons = [];
+
+function show(index) {
+  const item = answers[index];
+  buttons.forEach((b, i) => b.setAttribute("aria-current", String(i === index)));
+  document.getElementById("question").textContent = item.question;
+  const answer = document.getElementById("answer");
+  answer.textContent = item.refus
+    ? "Juriscope ne répond pas : les articles retrouvés ne permettent pas de répondre, ou la question sort du droit du travail."
+    : item.reponse;
+  answer.className = item.refus ? "refusal" : "";
+  const seconds = (item.latence_ms / 1000).toLocaleString("fr-FR", { maximumFractionDigits: 1 });
+  const cents = (item.cout * 100).toLocaleString("fr-FR", { maximumFractionDigits: 2 });
+  document.getElementById("meta").textContent = `Réponse en ${seconds} s, pour ${cents} centime.`;
+  const cites = document.getElementById("cites");
+  cites.replaceChildren();
+  if (item.citations.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "title";
+    empty.textContent = "Aucun article cité.";
+    cites.append(empty);
+  }
+  for (const cite of item.citations) {
+    const block = document.createElement("div");
+    block.className = "cite";
+    const number = document.createElement("div");
+    number.className = "number";
+    number.textContent = cite.numero;
+    const title = document.createElement("div");
+    title.className = "title";
+    title.textContent = cite.titre;
+    const link = document.createElement("a");
+    link.href = cite.url;
+    link.textContent = "Lire sur Légifrance";
+    block.append(number, title);
+    if (cite.modifie) {
+      const changed = document.createElement("div");
+      changed.className = "changed";
+      changed.textContent = "Modifié depuis la version précédente du corpus";
+      block.append(changed);
+    }
+    block.append(link);
+    cites.append(block);
+  }
+  const reading = document.getElementById("reading");
+  reading.classList.remove("fresh");
+  void reading.offsetWidth;
+  reading.classList.add("fresh");
+}
+
+let group = null;
+let list = null;
+answers.forEach((item, index) => {
+  if (item.groupe !== group) {
+    group = item.groupe;
+    const heading = document.createElement("h2");
+    heading.textContent = group;
+    list = document.createElement("ul");
+    nav.append(heading, list);
+  }
+  const entry = document.createElement("li");
+  const button = document.createElement("button");
+  button.type = "button";
+  button.textContent = item.question;
+  button.addEventListener("click", () => show(index));
+  buttons.push(button);
+  entry.append(button);
+  list.append(entry);
+});
+show(0);
+</script>
+</body>
+</html>

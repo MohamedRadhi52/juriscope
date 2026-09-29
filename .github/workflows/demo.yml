@@ -1,0 +1,71 @@
+name: demo
+
+# Calcule les réponses de la démo avec la meilleure chaîne mesurée, les commite, puis publie
+# la page sur GitHub Pages. Des réponses déjà commitées ne sont pas recalculées.
+on:
+  push:
+    branches: [main]
+    paths:
+      - src/juriscope/demo.py
+      - src/juriscope/templates/**
+      - .github/workflows/demo.yml
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: requirements*.txt
+      - uses: actions/cache@v6
+        with:
+          path: data/raw
+          key: npm-${{ hashFiles('data/sources.json') }}
+      - run: make data
+      - run: .venv/bin/pip install --quiet -r requirements-embed.txt
+      - name: Vecteurs et modèle affinés
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download embeddings -p ft-passages.npz -p e5-small-ft.zip --dir data/index --clobber
+          mkdir -p data/models && unzip -q data/index/e5-small-ft.zip -d data/models
+      - name: Réponses de la démo et page
+        shell: bash
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: .venv/bin/python -m juriscope.demo --precompute 2>&1 | tee demo.log
+      # la dernière ligne du journal devient une annotation, lisible sans être connecté
+      - name: Erreur en annotation
+        if: failure() || cancelled()
+        run: echo "::error title=Démo::$(tail -n 1 demo.log)"
+      - name: Commit des réponses
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add results/demo
+          git diff --cached --quiet || git commit -m "Démo : réponses calculées à l'avance"
+          git pull --rebase
+          git push
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

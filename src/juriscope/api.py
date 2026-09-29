@@ -57,8 +57,9 @@ def create_app(respond: Callable[[str], dict], articles: dict) -> FastAPI:
     return app
 
 
-def build_app() -> FastAPI:
-    """Meilleure chaîne mesurée : hybride avec le modèle affiné, reranker, génération citée."""
+def build_responder() -> tuple[Callable[[str], dict], dict]:
+    """Meilleure chaîne mesurée, garde-fous activés : hybride avec le modèle affiné, reranker,
+    génération citée. Renvoie la fonction qui répond et les articles par identifiant."""
     articles = load_corpus()
     by_cid = {a["cid"]: a for a in articles}
     complete = functools.partial(anthropic_complete, temperature=0)
@@ -74,4 +75,8 @@ def build_app() -> FastAPI:
         changed=frozenset(a["cid"] for a in veille["articles_modifies"]),
         guarded=True,
     )
-    return create_app(respond, by_cid)
+    return respond, by_cid
+
+
+def build_app() -> FastAPI:
+    return create_app(*build_responder())
