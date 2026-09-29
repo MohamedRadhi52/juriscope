@@ -10,6 +10,8 @@ intervalles de confiance, son coût et sa latence.
 
 Démo, avec des réponses calculées à l'avance : https://mohamedradhi52.github.io/juriscope/
 
+[![Démo : une question en langage courant, la réponse et l'article cité](docs/images/demo.png)](https://mohamedradhi52.github.io/juriscope/)
+
 ## En bref
 
 | Question | Réponse mesurée |
