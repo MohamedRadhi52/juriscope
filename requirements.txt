@@ -1,5 +1,6 @@
 bm25s==0.3.11
 langgraph==1.2.12
+mcp==2.2.0
 numpy==2.5.3
 pre-commit==4.6.2
 PyStemmer==3.1.0

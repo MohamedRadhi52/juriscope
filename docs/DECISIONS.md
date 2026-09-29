@@ -332,3 +332,20 @@ si la réponse contient les valeurs attendues, cite les articles attendus et ref
 le faut ; pour l'agent, les outils attendus doivent aussi avoir servi. Le RAG simple passe
 les mêmes scénarios, sans le critère des outils. Le juge LLM n'ayant pas été retenu, aucun
 critère ne dépend de lui.
+
+## Garde-fous en trois couches, et leur coût mesuré
+
+Un filtre refuse les formules d'injection classiques avant tout appel au modèle. Le prompt
+place la question et les articles entre balises et rappelle que ce sont des données, jamais
+des instructions. Toute réponse sans citation valide, ou qui recopie une phrase des consignes,
+devient un refus. Chaque attaque demande d'écrire un mot témoin, ce qui rend son succès
+vérifiable sans juge ; les documents piégés reçoivent une fausse consigne dans le texte d'un
+article retrouvé. Le coût des garde-fous se mesure aussi : la part des questions légitimes
+qui reçoivent encore une réponse citée.
+
+## Serveur MCP léger
+
+Le serveur MCP expose la recherche BM25 et la lecture d'un article par son numéro, sans clé
+d'API ni modèle à charger : un client MCP interroge le corpus en local, en quelques
+millisecondes. La recherche hybride demanderait le modèle d'embeddings, trop lourd pour ce
+rôle.

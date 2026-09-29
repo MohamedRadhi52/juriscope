@@ -180,6 +180,16 @@ centile. Les scénarios ont été écrits en même temps que les outils, et les 
 plusieurs étapes ne sont que six : ces chiffres montrent que l'agent fonctionne, pas l'ampleur
 exacte de son avantage.
 
+## Serveur MCP
+
+`python -m juriscope.mcp_server` expose deux outils, `rechercher` et `lire_article`, à tout
+client MCP, une fois le corpus construit par `make data`. Configuration type d'un client :
+
+```json
+{"mcpServers": {"juriscope": {"command": "/chemin/vers/juriscope/.venv/bin/python",
+                              "args": ["-m", "juriscope.mcp_server"]}}}
+```
+
 ## Veille des modifications
 
 Entre les versions de fin juillet 2026 (legi-data 2.552.0, kali-data 3.485.0) et les
