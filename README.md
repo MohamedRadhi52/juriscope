@@ -314,6 +314,12 @@ client MCP, une fois le corpus construit par `make data`. Configuration type d'u
 | `demo` | réponses de la démo, publication sur Pages | code de la démo modifié |
 | `keepalive` | garde les workflows planifiés actifs | chaque mois |
 
+## Licence
+
+Le code est sous licence MIT (fichier `LICENSE`). Les données gardent leurs licences
+d'origine : Licence Ouverte pour les bases LEGI et KALI, et licence du jeu BSARD, qui est
+téléchargé pendant les mesures sans être redistribué ici.
+
 ## Documentation
 
 Le cadrage (périmètre, types de questions, métriques, vérité terrain) est dans
