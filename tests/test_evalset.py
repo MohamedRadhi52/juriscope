@@ -122,23 +122,30 @@ def test_annotation_can_stop_and_resume(tmp_path, monkeypatch):
     ]
     eval_file, validation = tmp_path / "eval.jsonl", tmp_path / "validation.jsonl"
     eval_file.write_text("".join(json.dumps(q) + "\n" for q in questions), encoding="utf-8")
+    answers = tmp_path / "answers.jsonl"
+    answer = {"id": "q1", "refus": False, "reponse": "Oui.", "citations": ["L0"]}
+    answers.write_text(json.dumps(answer) + "\n", encoding="utf-8")
     monkeypatch.setattr(annotate, "EVAL", eval_file)
     monkeypatch.setattr(annotate, "VALIDATION", validation)
+    monkeypatch.setattr(annotate, "ANSWERS", answers)
     monkeypatch.setattr(annotate, "load_corpus", lambda: CORPUS)
     monkeypatch.setattr("sys.argv", ["annotate", "-n", "2"])
 
-    answers = iter(["o", "n", "RAS", "q"])
-    monkeypatch.setattr("builtins.input", lambda prompt: next(answers))
+    # q1 : clarté, réponse attendue, réponse du système, commentaire ; puis arrêt sur q2
+    replies = iter(["o", "n", "o", "RAS", "q"])
+    monkeypatch.setattr("builtins.input", lambda prompt: next(replies))
     annotate.main()
-    answers = iter(["x", "o", "o", ""])
-    monkeypatch.setattr("builtins.input", lambda prompt: next(answers))
+    # reprise sur q2, qui n'a pas de réponse du système ; "x" est redemandé
+    replies = iter(["x", "o", "o", ""])
+    monkeypatch.setattr("builtins.input", lambda prompt: next(replies))
     annotate.main()
 
-    rows = read_jsonl(validation)
-    assert {r["id"] for r in rows} == {"q1", "q2"}
-    assert next(r for r in rows if r["id"] == "q1") == {
+    rows = {row["id"]: row for row in read_jsonl(validation)}
+    assert rows["q1"] == {
         "id": "q1",
         "clear": True,
         "expected_ok": False,
+        "answer_ok": True,
         "comment": "RAS",
     }
+    assert rows["q2"] == {"id": "q2", "clear": True, "expected_ok": True, "comment": ""}

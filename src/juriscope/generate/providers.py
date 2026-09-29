@@ -11,6 +11,7 @@ from urllib.request import Request, urlopen
 
 ANTHROPIC_URL = "https://api.anthropic.com/v1/messages"
 MISTRAL_URL = "https://api.mistral.ai/v1/chat/completions"
+AZURE_API_VERSION = "2024-10-21"
 # dollars par million de jetons, en entrée puis en sortie (tarifs publics, septembre 2026)
 PRICES = {"claude-haiku-4-5-20251001": (1.0, 5.0)}
 
@@ -81,6 +82,27 @@ def mistral_complete(prompt: str, model: str) -> dict:
         "Content-Type": "application/json",
     }
     data = post_json(MISTRAL_URL, payload, headers)
+    return {
+        "model": data["model"],
+        "output": data["choices"][0]["message"]["content"],
+        "usage": {
+            "input_tokens": data["usage"]["prompt_tokens"],
+            "output_tokens": data["usage"]["completion_tokens"],
+        },
+    }
+
+
+def azure_openai_complete(prompt: str, model: str) -> dict:
+    """Azure OpenAI : model est le nom du déploiement, créé dans la ressource Azure.
+
+    Variables attendues : AZURE_OPENAI_ENDPOINT (https://<ressource>.openai.azure.com) et
+    AZURE_OPENAI_API_KEY.
+    """
+    endpoint = os.environ["AZURE_OPENAI_ENDPOINT"].rstrip("/")
+    url = f"{endpoint}/openai/deployments/{model}/chat/completions?api-version={AZURE_API_VERSION}"
+    payload = {"messages": [{"role": "user", "content": prompt}], "temperature": 0.7}
+    headers = {"api-key": os.environ["AZURE_OPENAI_API_KEY"], "Content-Type": "application/json"}
+    data = post_json(url, payload, headers)
     return {
         "model": data["model"],
         "output": data["choices"][0]["message"]["content"],

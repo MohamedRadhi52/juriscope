@@ -1,0 +1,47 @@
+name: generate
+
+# Répond aux 80 questions de l'échantillon d'annotation (hybride, reranker, génération citée)
+# après chaque évaluation réussie, et commite réponses et traces. Les réponses déjà produites
+# ne sont jamais refaites.
+on:
+  workflow_run:
+    workflows: [evaluate]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+          cache: pip
+      - uses: actions/cache@v6
+        with:
+          path: data/raw
+          key: npm-${{ hashFiles('data/sources.json') }}
+      - run: make data
+      - name: Vecteurs du workflow embed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release download embeddings --dir data/index --clobber
+      - name: Génération citée
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: .venv/bin/python -m juriscope.generate.run_generation | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Commit des réponses
+        if: ${{ !cancelled() }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add results
+          git diff --cached --quiet || git commit -m "Réponses citées de l'échantillon d'annotation"
+          git pull --rebase
+          git push

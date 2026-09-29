@@ -197,3 +197,33 @@ appel sont mesurés, car c'est le prix du gain en précision.
 Les API facturent en dollars : les coûts sont donnés en dollars pour 1 000 requêtes,
 calculés à partir des jetons réellement consommés et des tarifs publics, sans taux de
 change à supposer.
+
+## Génération citée au format JSON
+
+Le modèle reçoit les 5 meilleurs articles de l'hybride reclassé, numérotés, et répond en JSON :
+refus ou non, réponse, numéros des articles utilisés. Les numéros sont traduits en
+identifiants d'articles ; un numéro qui ne correspond à aucun article du contexte est compté
+comme citation invalide. Haiku 4.5 génère comme il reclasse, et le coût de chaque requête est
+mesuré.
+
+## Refuser plutôt qu'inventer
+
+La consigne demande de refuser quand les articles ne permettent pas de répondre, sans
+compléter avec les connaissances du modèle. Deux taux automatiques en découlent sur
+l'échantillon d'annotation : refus corrects sur les questions hors corpus et refus à tort
+sur les autres. La justesse des réponses viendra du juge LLM, validé contre les étiquettes
+humaines.
+
+## Traces de chaque requête
+
+Chaque réponse garde ses latences (recherche, génération, total), ses jetons et son coût,
+reranker compris. Les résumés donnent la latence p50 et p95 et le coût pour 1 000 requêtes.
+Un journal maison suffit à ce volume ; Langfuse ou OpenTelemetry prendraient le relais en
+production.
+
+## Une même interface pour trois fournisseurs
+
+Anthropic, Mistral et Azure OpenAI renvoient la même forme de réponse : modèle exact, texte
+et jetons. Azure OpenAI est couvert par un test avec une API simulée : il suffit de définir
+`AZURE_OPENAI_ENDPOINT` et `AZURE_OPENAI_API_KEY`, puis de passer le nom du déploiement comme
+modèle.
