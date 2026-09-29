@@ -1,0 +1,6 @@
+# Dépendances du calcul des vecteurs, installées seulement dans GitHub Actions (torch CPU)
+--extra-index-url https://download.pytorch.org/whl/cpu
+-r requirements.txt
+sentence-transformers==6.1.0
+torch==2.14.0
+transformers==5.17.0

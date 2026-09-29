@@ -3,4 +3,5 @@ numpy==2.5.3
 pre-commit==4.6.2
 PyStemmer==3.1.0
 pytest==9.1.1
+qdrant-client==1.19.1
 ruff==0.16.9

@@ -30,7 +30,7 @@ test-corpus: data
 	$(BIN)/pytest -m corpus
 
 eval: data
-	$(BIN)/python -m juriscope.eval.run_eval data/questions/pilote.jsonl
+	$(BIN)/python -m juriscope.eval.run_eval data/questions/eval.jsonl --split dev
 
 annotate: data
 	$(BIN)/python -m juriscope.evalset.annotate
