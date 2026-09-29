@@ -180,6 +180,22 @@ centile. Les scénarios ont été écrits en même temps que les outils, et les 
 plusieurs étapes ne sont que six : ces chiffres montrent que l'agent fonctionne, pas l'ampleur
 exacte de son avantage.
 
+## API
+
+`make api` lance l'API sur le port 8000 ; au premier lancement, le modèle affiné et ses
+vecteurs sont téléchargés depuis la release du dépôt.
+
+```bash
+curl -X POST localhost:8000/ask -H "Content-Type: application/json" \
+     -d '{"question": "Combien de jours de congés payés par mois ?"}'
+```
+
+La réponse contient le texte, les articles cités avec leur lien Légifrance, ceux qui ont été
+modifiés depuis la version précédente du corpus, la latence et le coût ; les garde-fous sont
+activés. Le workflow `quality-gate` protège cette chaîne : sur chaque pull request, il
+mesure la recherche sur le jeu de développement et la génération sur 12 questions fixes, et
+échoue sous les seuils.
+
 ## Serveur MCP
 
 `python -m juriscope.mcp_server` expose deux outils, `rechercher` et `lire_article`, à tout

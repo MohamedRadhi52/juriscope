@@ -1,4 +1,6 @@
 bm25s==0.3.11
+fastapi==0.142.1
+httpx==0.28.1
 langgraph==1.2.12
 mcp==2.2.0
 numpy==2.5.3
@@ -7,3 +9,4 @@ PyStemmer==3.1.0
 pytest==9.1.1
 qdrant-client==1.19.1
 ruff==0.16.9
+uvicorn==0.54.0

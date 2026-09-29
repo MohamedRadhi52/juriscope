@@ -2,7 +2,7 @@ PYTHON ?= python3.14
 VENV := .venv
 BIN := $(VENV)/bin
 
-.PHONY: install lint format test data test-corpus eval annotate
+.PHONY: install lint format test data test-corpus eval annotate api
 
 install: $(VENV)/.installed
 
@@ -34,3 +34,12 @@ eval: data
 
 annotate: data
 	$(BIN)/python -m juriscope.evalset.annotate
+
+# modèle affiné et ses vecteurs, publiés par le workflow finetune (torch en plus)
+data/models/e5-small-ft:
+	gh release download embeddings -p ft-passages.npz -p e5-small-ft.zip --dir data/index --clobber
+	unzip -oq data/index/e5-small-ft.zip -d data/models
+	$(BIN)/pip install --quiet --disable-pip-version-check -r requirements-embed.txt
+
+api: data data/models/e5-small-ft
+	$(BIN)/uvicorn juriscope.api:build_app --factory

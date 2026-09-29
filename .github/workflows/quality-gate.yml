@@ -1,0 +1,41 @@
+name: quality-gate
+
+# Porte de qualité : sur chaque pull request et à chaque push sur main, mesure la recherche
+# sur le jeu de développement et la génération sur un échantillon fixe, et échoue en dessous
+# des seuils.
+on:
+  pull_request:
+    paths: [src/**, data/**, requirements*.txt]
+  push:
+    branches: [main]
+    paths: [src/**, data/**, requirements*.txt, .github/workflows/quality-gate.yml]
+  workflow_dispatch:
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+          cache: pip
+      - uses: actions/cache@v6
+        with:
+          path: data/raw
+          key: npm-${{ hashFiles('data/sources.json') }}
+      - run: make data
+      - name: Vecteurs du modèle affiné
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release download embeddings -p ft-passages.npz -p ft-questions.npz --dir data/index
+      - name: Mesures et seuils
+        shell: bash
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: .venv/bin/python -m juriscope.eval.gate 2>&1 | tee gate.log | tee -a "$GITHUB_STEP_SUMMARY"
+      # la dernière ligne du journal devient une annotation, lisible sans être connecté
+      - name: Erreur en annotation
+        if: failure() || cancelled()
+        run: echo "::error title=Porte de qualité::$(tail -n 1 gate.log)"

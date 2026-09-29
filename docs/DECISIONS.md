@@ -352,3 +352,19 @@ Le serveur MCP expose la recherche BM25 et la lecture d'un article par son numé
 d'API ni modèle à charger : un client MCP interroge le corpus en local, en quelques
 millisecondes. La recherche hybride demanderait le modèle d'embeddings, trop lourd pour ce
 rôle.
+
+## API construite par une fabrique
+
+`create_app` reçoit la fonction qui répond : les tests la remplacent par une fausse, sans
+modèle ni clé, et `build_app` assemble pour le vrai service la meilleure chaîne mesurée, avec
+les garde-fous. Les liens Légifrance pointent vers la version en vigueur de chaque article,
+par son identifiant de version, et non vers son identifiant commun.
+
+## Porte de qualité sans juge
+
+Chaque pull request, et chaque push sur main, mesure le rappel@10 de l'hybride affiné sur le
+jeu de développement, avec les vecteurs des questions calculés à l'avance, donc de façon
+déterministe. Sur un échantillon fixe de 12 questions, elle vérifie aussi que les réponses
+sont lisibles, que leurs citations renvoient au contexte, que l'article attendu est cité et
+que les questions hors corpus sont refusées. Les seuils viennent des résultats mesurés, avec
+une marge pour la variabilité du modèle ; une exécution coûte quelques centimes.
