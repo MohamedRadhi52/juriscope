@@ -234,6 +234,11 @@ reste valide. Les 13 articles du Code modifiés donnent autant de questions temp
 (`data/questions/temporelles.jsonl`), et le workflow `veille` refait la comparaison chaque
 lundi avec les dernières versions publiées.
 
+Les 13 questions temporelles citent toutes un numéro d'article. BM25 ne place jamais le bon
+article en tête, au mieux au troisième rang et hors des 10 premiers dans 5 cas, car les
+articles qui citent ce numéro passent devant ; l'outil de lecture d'article de l'agent les
+retrouve toutes les 13 (`results/temporelles/bm25.json`).
+
 ## Limites
 
 Le jeu d'évaluation est écrit par un modèle de langage. Sa qualité n'est vérifiée que sur un
