@@ -44,21 +44,44 @@ def test_client_errors_are_not_retried_and_show_the_api_message(monkeypatch):
     assert calls[0].get_header("User-agent") == "juriscope"
 
 
-def test_mistral_json_sends_json_mode_and_returns_usage(monkeypatch):
+def test_anthropic_request_and_normalized_answer(monkeypatch):
     sent = {}
 
     def fake_post(url, payload, headers):
         sent.update(url=url, payload=payload, headers=headers)
+        return {
+            "model": "claude-haiku-4-5-20251001",
+            "content": [{"type": "text", "text": '{"question": "Q ?"}'}],
+            "usage": {"input_tokens": 10, "output_tokens": 5},
+        }
+
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "cle-de-test")
+    monkeypatch.setattr(providers, "post_json", fake_post)
+    answer = providers.anthropic_complete("Écris une question.", "claude-haiku-4-5-20251001")
+    assert sent["url"] == providers.ANTHROPIC_URL
+    assert sent["headers"]["x-api-key"] == "cle-de-test"
+    assert sent["payload"]["messages"] == [{"role": "user", "content": "Écris une question."}]
+    assert answer == {
+        "model": "claude-haiku-4-5-20251001",
+        "output": '{"question": "Q ?"}',
+        "usage": {"input_tokens": 10, "output_tokens": 5},
+    }
+
+
+def test_mistral_request_uses_json_mode_and_same_answer_shape(monkeypatch):
+    sent = {}
+
+    def fake_post(url, payload, headers):
+        sent.update(payload=payload, headers=headers)
         return RESPONSE
 
     monkeypatch.setenv("MISTRAL_API_KEY", "cle-de-test")
     monkeypatch.setattr(providers, "post_json", fake_post)
-    answer = providers.mistral_json("Écris une question.", "mistral-large-latest", seed=7)
+    answer = providers.mistral_complete("Écris une question.", "mistral-large-latest")
     assert sent["payload"]["response_format"] == {"type": "json_object"}
-    assert sent["payload"]["random_seed"] == 7
     assert sent["headers"]["Authorization"] == "Bearer cle-de-test"
     assert answer == {
         "model": "mistral-large-2511",
         "output": '{"question": "Q ?"}',
-        "usage": RESPONSE["usage"],
+        "usage": {"input_tokens": 10, "output_tokens": 5},
     }

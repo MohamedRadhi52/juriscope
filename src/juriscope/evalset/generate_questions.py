@@ -1,10 +1,11 @@
-"""Génère le jeu d'évaluation avec Mistral, à partir d'articles tirés au hasard.
+"""Génère le jeu d'évaluation avec un modèle de langage, à partir d'articles tirés au hasard.
 
 La vérité terrain est l'article source, ce qui dispense d'annoter pour mesurer la recherche.
 Les questions déjà écrites dans data/questions/generated.jsonl ne sont jamais réécrites :
 relancer complète un jeu interrompu et ne change rien à un jeu complet.
 """
 
+import argparse
 import json
 import random
 import re
@@ -14,11 +15,15 @@ from collections.abc import Callable
 from pathlib import Path
 
 from juriscope.corpus import load_corpus, read_jsonl
-from juriscope.generate.providers import mistral_json
+from juriscope.generate.providers import anthropic_complete, mistral_complete
 from juriscope.ingest import parse
 from juriscope.paths import DATA, RAW, SOURCES
 
-MODEL = "mistral-large-latest"
+# fournisseur par défaut, puis alternative si une clé Mistral est disponible
+PROVIDERS = {
+    "anthropic": (anthropic_complete, "claude-haiku-4-5-20251001"),
+    "mistral": (mistral_complete, "mistral-large-latest"),
+}
 SEED = 2026
 OUTPUT = DATA / "questions" / "generated.jsonl"
 CODE_SECURITE_SOCIALE = "LEGITEXT000006073189"
@@ -169,13 +174,13 @@ def build_tasks(corpus: list[dict], css: list[dict], counts: dict, seed: int) ->
     ]
 
 
-def generate(tasks: list[dict], output: Path, llm: Callable = mistral_json) -> int:
+def generate(tasks: list[dict], output: Path, complete: Callable, model: str) -> int:
     """Écrit la réponse du modèle pour chaque tâche absente du fichier ; renvoie leur nombre."""
     done = {row["id"] for row in read_jsonl(output)} if output.exists() else set()
     todo = [task for task in tasks if task["id"] not in done]
     output.parent.mkdir(parents=True, exist_ok=True)
     for number, task in enumerate(todo, 1):
-        answer = llm(task["prompt"], MODEL, SEED + int(task["id"][1:]))
+        answer = complete(task["prompt"], model)
         row = {key: value for key, value in task.items() if key != "prompt"}
         with output.open("a", encoding="utf-8") as f:
             f.write(json.dumps(row | answer, ensure_ascii=False) + "\n")
@@ -192,8 +197,11 @@ def load_css() -> list[dict]:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(prog="python -m juriscope.evalset.generate_questions")
+    parser.add_argument("--provider", choices=PROVIDERS, default="anthropic")
+    complete, model = PROVIDERS[parser.parse_args().provider]
     tasks = build_tasks(load_corpus(), load_css(), COUNTS, SEED)
-    written = generate(tasks, OUTPUT)
+    written = generate(tasks, OUTPUT, complete, model)
     print(f"{written} questions générées, {len(tasks)} au total dans {OUTPUT.name}")
 
 
