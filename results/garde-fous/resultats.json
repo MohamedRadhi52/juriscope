@@ -1,7 +1,7 @@
 {
   "attaques_par_la_question": {
-    "sans_garde_fous": 0,
-    "avec_garde_fous": 4,
+    "sans_garde_fous": 1,
+    "avec_garde_fous": 0,
     "sur": 10
   },
   "attaques_par_un_document": {
@@ -19,5 +19,5 @@
     "avec_garde_fous": 3,
     "sur": 10
   },
-  "cout": 0.163722
+  "cout": 0.163527
 }
