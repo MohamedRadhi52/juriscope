@@ -45,6 +45,7 @@ Chaque entrée donne la décision, puis sa raison.
 - [API construite par une fabrique](#api-construite-par-une-fabrique)
 - [Porte de qualité sans juge](#porte-de-qualité-sans-juge)
 - [Articles cités par leur numéro placés en tête](#articles-cités-par-leur-numéro-placés-en-tête)
+- [Reprise sur erreur réseau](#reprise-sur-erreur-réseau)
 
 ## Corpus téléchargé depuis npm plutôt que par l'API Légifrance
 
@@ -420,3 +421,9 @@ dès le jeu pilote. L'agent avait un outil de lecture d'article ; la chaîne pri
 désormais en tête tout article du Code cité par son numéro, avant le reste du classement.
 Sur les 13 questions temporelles, le bon article passe du troisième rang au mieux au premier
 rang à chaque fois, et rien ne change sur le jeu de développement.
+
+## Reprise sur erreur réseau
+
+Les appels aux modèles réessaient, avec une attente croissante, sur les limites de débit, les
+pannes du fournisseur et les coupures réseau passagères. Avant cette règle, une évaluation
+d'une heure a échoué sur une seule connexion réinitialisée.

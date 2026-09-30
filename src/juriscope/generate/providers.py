@@ -6,7 +6,7 @@ Chaque fonction renvoie le même dict : modèle exact, texte produit et jetons c
 import json
 import os
 import time
-from urllib.error import HTTPError
+from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 ANTHROPIC_URL = "https://api.anthropic.com/v1/messages"
@@ -32,7 +32,7 @@ def extract_json(text: str) -> dict | None:
 
 
 def post_json(url: str, payload: dict, headers: dict, attempts: int = 8) -> dict:
-    """POST JSON ; attend puis réessaie si l'API signale une limite de débit ou une panne."""
+    """POST JSON ; attend puis réessaie sur limite de débit, panne ou coupure réseau."""
     headers = headers | {"User-Agent": "juriscope"}
     request = Request(url, data=json.dumps(payload).encode(), headers=headers)
     for attempt in range(attempts):
@@ -46,6 +46,11 @@ def post_json(url: str, payload: dict, headers: dict, attempts: int = 8) -> dict
                 raise RuntimeError(f"{url} a répondu {error.code} : {detail}") from error
             # l'API indique parfois combien de secondes attendre avant de réessayer
             time.sleep(max(2**attempt, float(error.headers.get("retry-after") or 0)))
+        except URLError, TimeoutError, ConnectionError:
+            # coupure réseau passagère : connexion réinitialisée ou délai dépassé
+            if attempt == attempts - 1:
+                raise
+            time.sleep(2**attempt)
 
 
 def anthropic_complete(prompt: str, model: str, temperature: float | None = None) -> dict:

@@ -1,6 +1,6 @@
 import io
 import json
-from urllib.error import HTTPError
+from urllib.error import HTTPError, URLError
 
 import pytest
 
@@ -155,3 +155,18 @@ def test_temperature_is_sent_only_when_given(monkeypatch):
     providers.anthropic_complete("Q ?", "m", temperature=0)
     assert "temperature" not in sent[0]
     assert sent[1]["temperature"] == 0
+
+
+def test_a_transient_network_error_is_retried(monkeypatch):
+    calls = []
+
+    def fake_urlopen(request, timeout):
+        calls.append(request)
+        if len(calls) == 1:
+            raise URLError(ConnectionResetError(104, "Connection reset by peer"))
+        return io.BytesIO(json.dumps(RESPONSE).encode())
+
+    monkeypatch.setattr(providers, "urlopen", fake_urlopen)
+    monkeypatch.setattr(providers.time, "sleep", lambda seconds: None)
+    assert providers.post_json("https://example.org", {}, {}) == RESPONSE
+    assert len(calls) == 2
