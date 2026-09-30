@@ -1,6 +1,6 @@
 {
   "scenarios": 30,
-  "agent": 0.9666666666666667,
+  "agent": 1.0,
   "rag": 0.6,
   "par_type": {
     "article": {
@@ -25,7 +25,7 @@
     },
     "recherche": {
       "scenarios": 8,
-      "agent": 7,
+      "agent": 8,
       "rag": 7
     },
     "veille": {
@@ -36,6 +36,6 @@
   },
   "erreurs_outils": 0,
   "outils_par_question": 1.1666666666666667,
-  "latence_agent_p95_s": 7.42452356735001,
-  "cout_total": 0.404889
+  "latence_agent_p95_s": 9.86969566299997,
+  "cout_total": 0.403824
 }
