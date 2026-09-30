@@ -44,6 +44,7 @@ Chaque entrée donne la décision, puis sa raison.
 - [Serveur MCP léger](#serveur-mcp-léger)
 - [API construite par une fabrique](#api-construite-par-une-fabrique)
 - [Porte de qualité sans juge](#porte-de-qualité-sans-juge)
+- [Articles cités par leur numéro placés en tête](#articles-cités-par-leur-numéro-placés-en-tête)
 
 ## Corpus téléchargé depuis npm plutôt que par l'API Légifrance
 
@@ -411,3 +412,11 @@ déterministe. Sur un échantillon fixe de 12 questions, elle vérifie aussi que
 sont lisibles, que leurs citations renvoient au contexte, que l'article attendu est cité et
 que les questions hors corpus sont refusées. Les seuils viennent des résultats mesurés, avec
 une marge pour la variabilité du modèle ; une exécution coûte quelques centimes.
+
+## Articles cités par leur numéro placés en tête
+
+Une question qui cite "L1234-1" ramenait d'abord les articles qui citent ce numéro, relevé
+dès le jeu pilote. L'agent avait un outil de lecture d'article ; la chaîne principale place
+désormais en tête tout article du Code cité par son numéro, avant le reste du classement.
+Sur les 13 questions temporelles, le bon article passe du troisième rang au mieux au premier
+rang à chaque fois, et rien ne change sur le jeu de développement.

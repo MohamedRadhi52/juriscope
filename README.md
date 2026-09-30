@@ -32,7 +32,8 @@ flowchart LR
   bm25 --- rrf[Fusion RRF]
   dense --- rrf
   rrf --- rerank[Reranker Haiku 4.5]
-  rerank --- generation[Génération citée et garde-fous]
+  rerank --- references[Articles cités par leur numéro en tête]
+  references --- generation[Génération citée et garde-fous]
   generation --- api[API FastAPI]
   generation --- agent[Agent LangGraph]
   ingestion --- veille[Veille des versions]
@@ -234,10 +235,12 @@ reste valide. Les 13 articles du Code modifiés donnent autant de questions temp
 (`data/questions/temporelles.jsonl`), et le workflow `veille` refait la comparaison chaque
 lundi avec les dernières versions publiées.
 
-Les 13 questions temporelles citent toutes un numéro d'article. BM25 ne place jamais le bon
-article en tête, au mieux au troisième rang et hors des 10 premiers dans 5 cas, car les
-articles qui citent ce numéro passent devant ; l'outil de lecture d'article de l'agent les
-retrouve toutes les 13 (`results/temporelles/bm25.json`).
+Les 13 questions temporelles citent toutes un numéro d'article. BM25 seul ne place jamais le
+bon article en tête, au mieux au troisième rang et hors des 10 premiers dans 5 cas, car les
+articles qui citent ce numéro passent devant. La chaîne place donc en tête tout article du
+Code cité par son numéro : le bon article passe au premier rang dans les 13 cas, sans rien
+changer sur le jeu de développement, dont les questions ne citent pas de numéro
+(`results/temporelles/`).
 
 ## Limites
 

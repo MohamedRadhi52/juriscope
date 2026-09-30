@@ -19,6 +19,7 @@ from juriscope.paths import ROOT, SOURCES
 from juriscope.retrieve.bm25 import BM25
 from juriscope.retrieve.dense import Dense
 from juriscope.retrieve.fusion import Hybrid
+from juriscope.retrieve.references import References
 from juriscope.retrieve.rerank import Rerank
 
 RETRIEVERS = {
@@ -100,6 +101,7 @@ def main() -> None:
     parser.add_argument("questions", type=Path, help="fichier JSONL de questions")
     parser.add_argument("--retriever", choices=RETRIEVERS, default="bm25")
     parser.add_argument("--split", choices=["dev", "test"], help="partie du jeu à évaluer")
+    parser.add_argument("--references", action="store_true", help="numéros cités en tête")
     args = parser.parse_args()
 
     # les questions hors corpus n'ont pas d'article attendu : elles servent à la génération
@@ -108,16 +110,22 @@ def main() -> None:
         for q in read_jsonl(args.questions)
         if q["relevant"] and (args.split is None or q["split"] == args.split)
     ]
-    result = evaluate(build(args.retriever, load_corpus()), questions)
+    articles = load_corpus()
+    retriever = build(args.retriever, articles)
+    if args.references:
+        retriever = References(retriever, articles)
+    result = evaluate(retriever, questions)
     result["corpus"] = json.loads(SOURCES.read_text())
 
     name = f"{args.questions.stem}-{args.split}" if args.split else args.questions.stem
-    out = ROOT / "results" / name / f"{args.retriever}.json"
+    suffix = "-references" if args.references else ""
+    out = ROOT / "results" / name / f"{args.retriever}{suffix}.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n")
     print(f"{out.relative_to(ROOT)} ({result['questions']} questions)\n")
     print(HEADER)
-    print(table_row(RETRIEVERS[args.retriever], result))
+    label = RETRIEVERS[args.retriever] + (", numéros cités en tête" if args.references else "")
+    print(table_row(label, result))
 
 
 if __name__ == "__main__":

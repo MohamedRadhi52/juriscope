@@ -1,23 +1,22 @@
 """Outils de l'agent : lecture d'un article, métadonnées des conventions en SQL, veille."""
 
 import json
-import re
 import sqlite3
 import tarfile
 from pathlib import Path
 
 from juriscope.ingest.parse import CONVENTIONS
 from juriscope.paths import CORPUS, RAW, ROOT, SOURCES
+from juriscope.retrieve.references import cited_numbers
 
 DATABASE = CORPUS / "conventions.sqlite"
 VEILLE = ROOT / "results" / "veille" / "rapport.json"
-ARTICLE_NUMBER = re.compile(r"\b([LRD])\.?\s?(\d{4}-\d+(?:-\d+)*)", re.IGNORECASE)
 
 
 def find_article(entree: str, code_articles: dict) -> dict:
     """Texte d'un article du Code désigné par son numéro : L1234-1, L. 1234-1 ou l1234-1."""
-    match = ARTICLE_NUMBER.search(entree)
-    article = code_articles.get(f"{match[1].upper()}{match[2]}") if match else None
+    numbers = cited_numbers(entree)
+    article = code_articles.get(numbers[0]) if numbers else None
     if article is None:
         return {"erreur": f"aucun article du Code du travail ne correspond à {entree!r}"}
     return {"cid": article["cid"], "titre": article["title"], "texte": article["text"][:1500]}

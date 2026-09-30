@@ -21,6 +21,7 @@ from juriscope.retrieve.bm25 import BM25
 from juriscope.retrieve.dense import Dense
 from juriscope.retrieve.embed import live_encoder
 from juriscope.retrieve.fusion import Hybrid
+from juriscope.retrieve.references import References
 from juriscope.retrieve.rerank import Rerank
 
 MODEL = "claude-haiku-4-5-20251001"
@@ -58,13 +59,16 @@ def create_app(respond: Callable[[str], dict], articles: dict) -> FastAPI:
 
 
 def build_responder() -> tuple[Callable[[str], dict], dict]:
-    """Meilleure chaîne mesurée, garde-fous activés : hybride avec le modèle affiné, reranker,
-    génération citée. Renvoie la fonction qui répond et les articles par identifiant."""
+    """Meilleure chaîne mesurée, garde-fous activés : articles cités par leur numéro en tête,
+    puis hybride avec le modèle affiné, reranker et génération citée. Renvoie la fonction qui
+    répond et les articles par identifiant."""
     articles = load_corpus()
     by_cid = {a["cid"]: a for a in articles}
     complete = functools.partial(anthropic_complete, temperature=0)
     dense = Dense.from_index("ft", encode=live_encoder(str(DATA / "models" / "e5-small-ft")))
-    retriever = Rerank(Hybrid([BM25(articles), dense]), by_cid, complete, MODEL)
+    retriever = References(
+        Rerank(Hybrid([BM25(articles), dense]), by_cid, complete, MODEL), articles
+    )
     veille = json.loads((ROOT / "results" / "veille" / "rapport.json").read_text())
     respond = functools.partial(
         answer,
