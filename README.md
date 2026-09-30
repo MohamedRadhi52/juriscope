@@ -18,7 +18,7 @@ Démo, avec des réponses calculées à l'avance : https://mohamedradhi52.github
 | Le fine-tuning des embeddings sert-il ? | +0,061 de rappel@10 en apparié [+0,010 ; +0,115] ; sur les paraphrases, de 0,26 à 0,53 |
 | Les réponses sont-elles justes ? | 44 % correctes et fidèles aux articles cités selon l'annotation humaine [32 % ; 55 %], 15 refus corrects sur 16 questions hors corpus |
 | Un juge LLM peut-il remplacer l'annotation ? | Non : kappa de 0,46 avec les étiquettes humaines, sous le seuil de 0,6 fixé d'avance |
-| Un agent fait-il mieux qu'un RAG simple ? | 29 scénarios réussis sur 30 contre 18, grâce aux données absentes des textes et aux questions à plusieurs étapes |
+| Un agent fait-il mieux qu'un RAG simple ? | 30 scénarios réussis sur 30 contre 18 (29 lors d'un premier passage), grâce aux données absentes des textes et aux questions à plusieurs étapes |
 | Et sur un autre droit ? | Sur BSARD (droit belge), R@100 de 0,590 pour l'hybride, sans entraînement sur ce jeu |
 | Combien coûte une réponse ? | 8,5 $ pour 1 000 requêtes, 5,4 s au 95e centile |
 
@@ -146,7 +146,7 @@ l'article de convention dans 12 cas sur 17, mais celui du Code dans 2 seulement.
 
 ### Génération citée
 
-Les 5 meilleurs articles de l'hybride reclassé sont fournis à Haiku 4,5, qui répond en les
+Les 5 meilleurs articles de l'hybride reclassé sont fournis à Haiku 4.5, qui répond en les
 citant ou refuse. La mesure de référence est l'annotation humaine de l'échantillon (80
 questions, 16 par type, réponses produites sans le modèle affiné) :
 
@@ -162,7 +162,7 @@ réponse, 98 % de citations qui renvoient au contexte fourni et l'article attend
 dans 66 % des cas, pour une latence de 3,0 s en médiane et 5,4 s au 95e centile,
 et 8,51 $ pour 1 000 requêtes, reranker compris.
 
-Le juge LLM (Sonnet 5,5) devait prendre le relais de l'annotation. Son kappa avec les
+Le juge LLM (Sonnet 5.5) devait prendre le relais de l'annotation. Son kappa avec les
 étiquettes humaines vaut 0,46 [0,26 ; 0,66] sur les 64 questions qui ont une réponse, sous le seuil
 de 0,6 fixé avant le calcul : il n'est pas retenu. Il est trop indulgent : 14 des 17
 désaccords sont des réponses qu'il accepte et que l'annotation refuse. Sur le jeu de
@@ -179,20 +179,21 @@ Sur 30 scénarios à critères vérifiables (valeurs attendues, articles cités,
 | Type de scénario | Scénarios | Agent | RAG simple |
 |---|---:|---:|---:|
 | Lecture d'article | 5 | 5 | 5 |
-| Recherche simple | 8 | 7 | 7 |
+| Recherche simple | 8 | 8 | 7 |
 | Hors périmètre | 3 | 3 | 3 |
 | Conventions (données SQL) | 5 | 5 | 1 |
 | Veille | 3 | 3 | 0 |
 | Plusieurs étapes | 6 | 6 | 2 |
-| **Total** | **30** | **29** | **18** |
+| **Total** | **30** | **30** | **18** |
 
 Sur les types que le RAG simple peut traiter (lecture d'article, recherche, hors périmètre),
-les deux font jeu égal, 15 sur 16. L'agent gagne là où il faut des données absentes des
-textes, métadonnées des conventions et veille, et sur les questions à plusieurs étapes. Il
-n'a fait aucune erreur d'outil, en utilise 1,2 par question, et répond en 7,4 s au 95e
-centile. Les scénarios ont été écrits en même temps que les outils, et les questions à
-plusieurs étapes ne sont que six : ces chiffres montrent que l'agent fonctionne, pas l'ampleur
-exacte de son avantage.
+les deux font presque jeu égal, 16 sur 16 pour l'agent contre 15. L'agent gagne là où il faut
+des données absentes des textes, métadonnées des conventions et veille, et sur les questions
+à plusieurs étapes. Il n'a fait aucune erreur d'outil, en utilise 1,2 par question, et répond
+en 9,9 s au 95e centile. Un premier passage avait donné 29 sur 30 et 7,4 s : l'agent varie
+d'un passage à l'autre. Les scénarios ont été écrits en même temps que les outils, et les
+questions à plusieurs étapes ne sont que six : ces chiffres montrent que l'agent fonctionne,
+pas l'ampleur exacte de son avantage.
 
 ### Garde-fous contre l'injection de prompt
 
